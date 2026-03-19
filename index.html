@@ -1,4 +1,4 @@
-       <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,6 +49,40 @@
       50% { transform: rotate(180deg); }
       100% { top: -50px; left: 90%; transform: rotate(360deg); }
     }
+
+    /* Keranjang Melayang */
+    #floatingCart {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #C58940;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 9999px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      z-index: 50;
+      transition: transform 0.2s;
+    }
+
+    #floatingCart img { width: 32px; height: 32px; }
+
+    @keyframes goyang {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(-15deg); }
+      50% { transform: rotate(15deg); }
+      75% { transform: rotate(-10deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .goyang {
+      animation: goyang 0.5s ease-in-out;
+    }
+
+    #floatingCart:hover { transform: scale(1.1); }
   </style>
 </head>
 <body class="bg-[#FFF8F0] text-[#5A3E2B]">
@@ -170,6 +204,15 @@
     </button>
   </div>
 
+  <!-- Keranjang Melayang -->
+  <div id="floatingCart">
+    <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png">
+    <span id="cartCount" class="font-bold text-lg">0</span>
+  </div>
+
+  <!-- Suara bel -->
+  <audio id="bellSound" src="https://freesound.org/data/previews/341/341695_5260870-lq.mp3"></audio>
+
   <script>
     const harga1 = 60000;
     const harga2 = 65000;
@@ -177,6 +220,10 @@
 
     const penjualLat = -6.259853;
     const penjualLng = 106.696360;
+
+    const bell = document.getElementById('bellSound');
+    const cart = document.getElementById('floatingCart');
+    const cartCount = document.getElementById('cartCount');
 
     function hitungTotal(){
       let q1 = parseInt(document.getElementById('qty1').value) || 0;
@@ -187,8 +234,25 @@
       document.getElementById('total').innerText = "Rp" + total.toLocaleString();
     }
 
-    document.getElementById('qty1').addEventListener('input', hitungTotal);
-    document.getElementById('qty2').addEventListener('input', hitungTotal);
+    function updateCart(change=0){
+      let qty1 = parseInt(document.getElementById('qty1').value) || 0;
+      let qty2 = parseInt(document.getElementById('qty2').value) || 0;
+      let totalItems = qty1 + qty2;
+
+      cartCount.innerText = totalItems;
+
+      if(change !== 0){
+        cart.classList.add('goyang');
+        bell.currentTime = 0;
+        bell.play();
+        setTimeout(()=>cart.classList.remove('goyang'), 500);
+      }
+    }
+
+    document.getElementById('qty1').addEventListener('input', ()=>{hitungTotal(); updateCart(1);});
+    document.getElementById('qty2').addEventListener('input', ()=>{hitungTotal(); updateCart(1);});
+
+    cart.addEventListener('click', ()=>{ window.scrollTo({top:0, behavior:'smooth'}); });
 
     function ambilLokasi(){
       if(navigator.geolocation){
@@ -247,6 +311,7 @@
         document.getElementById("ongkir").value = 0;
       }
       hitungTotal();
+      updateCart();
     }
 
     togglePengiriman();
