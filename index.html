@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nastar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+  <!-- Hero -->
+  <div class="text-center p-5 bg-white shadow">
+    <h1 class="text-2xl font-bold">Zein Kitchen</h1>
+    <p class="text-gray-600">Lembut, Lumer, Premium 😋</p>
+  </div>
+
+  <!-- Menu -->
+  <div class="p-4">
+    <h2 class="text-xl font-bold mb-3">Menu 🔥</h2>
+
+    <div class="bg-white p-4 rounded-xl shadow mb-4">
+      <img src="https://via.placeholder.com/300">
+      <h3 class="font-semibold text-lg">Nastar Original</h3>
+      <p>Rp60.000</p>
+      <input type="number" id="qty1" value="0" min="0" class="w-full mt-2 p-2 border rounded" placeholder="Jumlah">
+    </div>
+
+    <div class="bg-white p-4 rounded-xl shadow">
+      <img src="https://via.placeholder.com/300">
+      <h3 class="font-semibold text-lg">Nastar Keju</h3>
+      <p>Rp65.000</p>
+      <input type="number" id="qty2" value="0" min="0" class="w-full mt-2 p-2 border rounded" placeholder="Jumlah">
+    </div>
+  </div>
+
+  <!-- Alamat -->
+  <div class="p-4">
+    <div class="bg-white p-4 rounded-xl shadow">
+      <h2 class="font-bold mb-2">Alamat Pengiriman 📍</h2>
+      <textarea id="alamat" class="w-full p-2 border rounded" placeholder="Masukkan alamat lengkap"></textarea>
+    </div>
+  </div>
+
+  <!-- Ongkir -->
+  <div class="p-4">
+    <div class="bg-white p-4 rounded-xl shadow">
+      <h2 class="font-bold mb-2">Ongkir 🚚</h2>
+      <select id="ongkir" class="w-full p-2 border rounded">
+        <option value="0">Ambil sendiri (Gratis)</option>
+        <option value="10000">Dekat (10.000)</option>
+        <option value="20000">Jauh (20.000)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Total -->
+  <div class="p-4">
+    <div class="bg-white p-4 rounded-xl shadow text-center">
+      <p>Total Harga:</p>
+      <h2 id="total" class="text-2xl font-bold">Rp0</h2>
+    </div>
+  </div>
+
+  <!-- Checkout -->
+  <div class="p-4">
+    <button onclick="checkout()" class="w-full bg-green-500 text-white p-3 rounded-xl">
+      Checkout via WhatsApp
+    </button>
+  </div>
+
+  <script>
+    const harga1 = 60000;
+    const harga2 = 65000;
+
+    function hitungTotal(){
+      let q1 = document.getElementById('qty1').value || 0;
+      let q2 = document.getElementById('qty2').value || 0;
+      let ongkir = document.getElementById('ongkir').value || 0;
+
+      let total = (q1 * harga1) + (q2 * harga2) + parseInt(ongkir);
+
+      document.getElementById('total').innerText = "Rp" + total.toLocaleString();
+    }
+
+    document.getElementById('qty1').addEventListener('input', hitungTotal);
+    document.getElementById('qty2').addEventListener('input', hitungTotal);
+    document.getElementById('ongkir').addEventListener('change', hitungTotal);
+
+    function checkout(){
+      let q1 = document.getElementById('qty1').value;
+      let q2 = document.getElementById('qty2').value;
+      let alamat = document.getElementById('alamat').value;
+      let ongkirText = document.getElementById('ongkir').selectedOptions[0].text;
+      let ongkir = document.getElementById('ongkir').value;
+
+      let pesan = "Bunda , saya mau pesan:%0A";
+
+      if(q1 > 0){
+        pesan += "- Nastar Original: " + q1 + " toples%0A";
+      }
+      if(q2 > 0){
+        pesan += "- Nastar Keju: " + q2 + " toples%0A";
+      }
+
+      pesan += "%0AAlamat: " + alamat + "%0A";
+      pesan += "Ongkir: " + ongkirText + "%0A";
+
+      let total = (q1 * harga1) + (q2 * harga2) + parseInt(ongkir);
+      pesan += "Total: Rp" + total.toLocaleString();
+
+      let url = "https://wa.me/6289610554134?text=" + pesan;
+      window.open(url, '_blank');
+    }
+  </script>
+
+</body>
+</html>
