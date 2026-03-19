@@ -68,12 +68,12 @@
   <!-- Hero -->
   <div class="text-center p-5 bg-[#FDEBD0] shadow">
     <h1 class="text-2xl font-bold text-[#8B4513]">Zein Kitchen</h1>
-    <p class="text-[#A67C52]">Lembut, Lumer, Premium 😋</p>
+    <p class="text-[#A67C52]">Manis,Gurih & Nagih</p>
   </div>
 
   <!-- Menu -->
   <div class="p-4">
-    <h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu 🔥</h2>
+    <h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu🍪</h2>
 
     <div class="bg-[#FFFDF9] p-4 rounded-xl shadow mb-4 border border-[#F3D7B6]">
       <img src="n1.jpg" class="w-full h-40 object-cover rounded-xl mb-2">
@@ -90,20 +90,29 @@
     </div>
   </div>
 
-  <!-- Alamat -->
+  <!-- Alamat & Pengiriman -->
   <div class="p-4">
     <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
       <h2 class="font-bold mb-2 text-[#8B4513]">Alamat Pengiriman 📍</h2>
 
-      <label class="text-sm font-semibold mb-1">Lokasi Otomatis</label>
-      <textarea id="alamatAuto" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" placeholder="Klik ambil lokasi otomatis" readonly></textarea>
-      <button onclick="ambilLokasi()" 
-        class="w-full bg-[#8B4513] hover:bg-[#6B2E12] text-white p-2 rounded transition mb-4">
-        📍 Ambil Lokasi Otomatis
-      </button>
+      <label class="text-sm font-semibold mb-1">Opsi Pengiriman</label>
+      <select id="opsiKirim" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" onchange="togglePengiriman()">
+        <option value="COD">🛵 COD (Bayar di Tempat)</option>
+        <option value="PickUp">🎒 Ambil Sendiri / Pick Up (Gratis)</option>
+        <option value="Transfer">🏦 Transfer Bank</option>
+      </select>
 
-      <label class="text-sm font-semibold mb-1">Detail Alamat</label>
-      <textarea id="alamatDetail" class="w-full p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]" placeholder="Tambahkan detail alamat, nomor rumah, catatan kurir"></textarea>
+      <div id="alamatBlock">
+        <label class="text-sm font-semibold mb-1">Lokasi Otomatis</label>
+        <textarea id="alamatAuto" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" placeholder="Klik ambil lokasi otomatis" readonly></textarea>
+        <button onclick="ambilLokasi()" 
+          class="w-full bg-[#8B4513] hover:bg-[#6B2E12] text-white p-2 rounded transition mb-4">
+          📍 Ambil Lokasi Otomatis
+        </button>
+
+        <label class="text-sm font-semibold mb-1">Detail Alamat</label>
+        <textarea id="alamatDetail" class="w-full p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]" placeholder="Tambahkan detail alamat, nomor rumah, catatan kurir"></textarea>
+      </div>
     </div>
   </div>
 
@@ -166,16 +175,15 @@
     const harga2 = 65000;
     const hargaPerKm = 5000;
 
-    // Koordinat Zein Kitchen
     const penjualLat = -6.259853;
     const penjualLng = 106.696360;
 
     function hitungTotal(){
-      let q1 = document.getElementById('qty1').value || 0;
-      let q2 = document.getElementById('qty2').value || 0;
-      let ongkir = document.getElementById('ongkir').value || 0;
+      let q1 = parseInt(document.getElementById('qty1').value) || 0;
+      let q2 = parseInt(document.getElementById('qty2').value) || 0;
+      let ongkir = parseInt(document.getElementById('ongkir').value) || 0;
 
-      let total = (q1 * harga1) + (q2 * harga2) + parseInt(ongkir);
+      let total = (q1 * harga1) + (q2 * harga2) + ongkir;
       document.getElementById('total').innerText = "Rp" + total.toLocaleString();
     }
 
@@ -188,10 +196,8 @@
           let lat = position.coords.latitude;
           let lng = position.coords.longitude;
 
-          // alamat otomatis
           document.getElementById('alamatAuto').value = `https://www.google.com/maps?q=${lat},${lng}`;
 
-          // hitung jarak & ongkir COD
           const jarak = hitungJarak(penjualLat, penjualLng, lat, lng);
           const biaya = Math.ceil(jarak) * hargaPerKm;
 
@@ -225,24 +231,51 @@
       alert("Nomor rekening disalin!");
     }
 
+    function togglePengiriman(){
+      const opsi = document.getElementById("opsiKirim").value;
+
+      document.getElementById("rekening").classList.toggle("hidden", opsi !== "Transfer");
+      document.getElementById("bukti").classList.toggle("hidden", opsi !== "Transfer");
+
+      if(opsi === "PickUp"){
+        document.getElementById("alamatBlock").style.display = "none";
+        document.getElementById("ongkirText").innerText = "Ambil Sendiri / Pick Up - Gratis Ongkir";
+        document.getElementById("ongkir").value = 0;
+      } else {
+        document.getElementById("alamatBlock").style.display = "block";
+        document.getElementById("ongkirText").innerText = "Ambil lokasi untuk menghitung ongkir COD...";
+        document.getElementById("ongkir").value = 0;
+      }
+      hitungTotal();
+    }
+
+    togglePengiriman();
+
     function checkout(){
-      let q1 = document.getElementById('qty1').value;
-      let q2 = document.getElementById('qty2').value;
+      let q1 = parseInt(document.getElementById('qty1').value) || 0;
+      let q2 = parseInt(document.getElementById('qty2').value) || 0;
       let alamatAuto = document.getElementById('alamatAuto').value;
       let alamatDetail = document.getElementById('alamatDetail').value;
       let ongkirText = document.getElementById('ongkirText').innerText;
-      let ongkir = document.getElementById('ongkir').value;
+      let ongkir = parseInt(document.getElementById('ongkir').value) || 0;
       let metode = document.getElementById('metode').value;
+      let opsiKirim = document.getElementById('opsiKirim').value;
 
       let pesan = "Bunda Zein , saya mau pesan:%0A";
       if(q1>0) pesan += `- Nastar Original: ${q1} toples%0A`;
       if(q2>0) pesan += `- Nastar Keju: ${q2} toples%0A`;
-      pesan += `%0AAlamat Otomatis: ${alamatAuto}%0A`;
-      pesan += `Detail Alamat: ${alamatDetail}%0A`;
+
+      if(opsiKirim !== "PickUp"){
+        pesan += `%0AAlamat Otomatis: ${alamatAuto}%0A`;
+        pesan += `Detail Alamat: ${alamatDetail}%0A`;
+      } else {
+        pesan += `%0ASaya akan mengambil sendiri / Pick Up (Gratis Ongkir)%0A`;
+      }
+
       pesan += `Ongkir: ${ongkirText}%0A`;
       pesan += `Metode: ${metode}%0A`;
 
-      let total = (q1*harga1) + (q2*harga2) + parseInt(ongkir);
+      let total = (q1*harga1) + (q2*harga2) + ongkir;
       pesan += `Total: Rp${total.toLocaleString()}`;
 
       window.location.href = `https://wa.me/6289610554134?text=${pesan}`;
