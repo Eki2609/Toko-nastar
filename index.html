@@ -1,27 +1,22 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zein Kitchen</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  body { font-family: sans-serif; }
-  /* Animasi Ramadhan */
+  body { background:#FFF8F0; color:#5A3E2B; }
   .animasi-ramadhan { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:10; }
-  .bintang, .bulan { position:absolute; width:20px; height:20px; background:gold; border-radius:50%; animation: turun 15s linear infinite; }
+  .bintang, .bulan { position:absolute; background:gold; border-radius:50%; animation:turun 15s linear infinite; }
   .bulan { width:30px; height:30px; border-radius:50% 50% 50% 0; transform: rotate(-45deg); }
-  .kue { position:absolute; width:30px; height:30px; background:#F4A460; border-radius:50%; animation: melayang 10s linear infinite; }
-  @keyframes turun { 0%{top:-50px;transform:translateX(0);opacity:0;}50%{opacity:1;}100%{top:100%;transform:translateX(100px);opacity:0;} }
-  @keyframes melayang { 0%{top:100%;left:10%;transform:rotate(0deg);}50%{transform:rotate(180deg);}100%{top:-50px;left:90%;transform:rotate(360deg);} }
-  /* Keranjang goyang */
-  @keyframes goyang { 0%{transform:rotate(0deg);}25%{transform:rotate(15deg);}50%{transform:rotate(-15deg);}75%{transform:rotate(10deg);}100%{transform:rotate(0deg);} }
-  /* Admin panel */
-  #adminPanel { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; z-index:30; overflow:auto; padding:2rem; }
-  #adminPanelContent { background:#FFF8F0; border-radius:1rem; padding:1rem; max-width:500px; margin:0 auto; }
-  .admin-btn { background:#C58940; color:white; padding:0.5rem 1rem; border-radius:0.5rem; cursor:pointer; margin:0.25rem 0; }
+  .kue { position:absolute; width:30px; height:30px; background:#F4A460; border-radius:50%; animation:melayang 10s linear infinite; }
+  @keyframes turun { 0%{top:-50px; transform:translateX(0); opacity:0;} 50%{opacity:1;} 100%{top:100%; transform:translateX(100px); opacity:0;} }
+  @keyframes melayang { 0%{top:100%; left:10%; transform:rotate(0deg);} 50%{transform:rotate(180deg);} 100%{top:-50px; left:90%; transform:rotate(360deg);} }
+  @keyframes goyang { 0%{transform:rotate(0deg);} 25%{transform:rotate(15deg);} 50%{transform:rotate(-15deg);} 75%{transform:rotate(10deg);} 100%{transform:rotate(0deg);} }
+  @media (min-width: 500px) { body { zoom:0.6; } }
 </style>
 </head>
-<body class="bg-[#FFF8F0] text-[#5A3E2B]">
+<body>
 
 <!-- Animasi Ramadhan -->
 <div class="animasi-ramadhan">
@@ -40,10 +35,36 @@
   <p class="text-[#A67C52]">Manis, Gurih & Nagih</p>
 </div>
 
-<!-- Menu -->
+<!-- Admin Login Dropdown -->
+<div class="p-4">
+  <select id="adminDropdown" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" onchange="adminLogin(this.value)">
+    <option value="">--Login Admin--</option>
+    <option value="login">🔑 Masuk Admin</option>
+  </select>
+</div>
+
+<!-- Admin Panel (hidden) -->
+<div id="adminPanel" class="p-4 hidden bg-[#FFFDF9] rounded-xl shadow border border-[#F3D7B6]">
+  <h2 class="font-bold mb-2 text-[#8B4513]">Panel Admin</h2>
+  <label class="text-sm font-semibold mb-1">Password Admin:</label>
+  <input type="password" id="adminPass" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]">
+  <button onclick="cekAdmin()" class="w-full bg-[#C58940] hover:bg-[#A9712A] text-white p-2 rounded">Login</button>
+  <div id="adminActions" class="hidden mt-4">
+    <h3 class="font-semibold mb-2">Tambah / Edit Menu</h3>
+    <label class="text-sm">Nama Item:</label>
+    <input type="text" id="itemName" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]">
+    <label class="text-sm">Harga:</label>
+    <input type="number" id="itemPrice" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]">
+    <label class="text-sm">Gambar (URL):</label>
+    <input type="text" id="itemImg" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]">
+    <button onclick="tambahItem()" class="w-full bg-[#8B4513] hover:bg-[#6B2E12] text-white p-2 rounded mb-2">Tambah / Update Item</button>
+  </div>
+</div>
+
+<!-- Menu Container -->
 <div class="p-4" id="menuContainer">
-  <h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu🍪</h2>
-  <!-- Item akan dimuat di sini via JS -->
+  <h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu 🍪</h2>
+  <!-- Menu akan dirender di sini -->
 </div>
 
 <!-- Alamat & Pengiriman -->
@@ -56,7 +77,6 @@
       <option value="PickUp">🎒 Ambil Sendiri / Pick Up (Gratis)</option>
       <option value="Transfer">🏦 Transfer Bank</option>
     </select>
-
     <div id="alamatBlock">
       <label class="text-sm font-semibold mb-1">Lokasi Otomatis</label>
       <textarea id="alamatAuto" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" placeholder="Klik ambil lokasi otomatis" readonly></textarea>
@@ -76,7 +96,7 @@
   </div>
 </div>
 
-<!-- Pembayaran -->
+<!-- Metode Pembayaran -->
 <div class="p-4">
   <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
     <h2 class="font-bold mb-2 text-[#8B4513]">Metode Pembayaran 💳</h2>
@@ -100,7 +120,7 @@
   </div>
 </div>
 
-<!-- Total -->
+<!-- Total Harga -->
 <div class="p-4">
   <div class="bg-[#FDEBD0] p-4 rounded-xl shadow text-center border border-[#F3D7B6]">
     <p class="text-[#6B4226]">Total Harga:</p>
@@ -113,182 +133,133 @@
   <button onclick="checkout()" class="w-full bg-[#C58940] hover:bg-[#A9712A] text-white p-3 rounded-xl transition">Checkout via WhatsApp</button>
 </div>
 
-<!-- Keranjang -->
-<div id="keranjang" class="fixed bottom-5 right-5 w-16 h-16 bg-[#C58940] rounded-full shadow-lg flex items-center justify-center cursor-pointer z-20">🛒 <span id="jumlahKeranjang" class="ml-1 font-bold text-white">0</span></div>
-
-<!-- Admin Panel -->
-<div id="adminPanel">
-  <div id="adminPanelContent">
-    <h2 class="text-xl font-bold mb-2">Admin Panel</h2>
-    <button class="admin-btn" onclick="tambahItem()">Tambah Item Baru</button>
-    <button class="admin-btn" onclick="exportJSON()">Export JSON</button>
-    <button class="admin-btn" onclick="document.getElementById('adminPanel').style.display='none'">Tutup Panel</button>
-    <div id="adminItemsContainer" class="mt-2"></div>
-  </div>
+<!-- Keranjang Belanja -->
+<div id="keranjang" class="fixed bottom-5 right-5 w-16 h-16 bg-[#C58940] rounded-full shadow-lg flex items-center justify-center cursor-pointer z-20">
+  🛒 <span id="jumlahKeranjang" class="ml-1 font-bold text-white">0</span>
 </div>
 
 <script>
-  const hargaPerKm = 5000;
-  const penjualLat = -6.259853;
-  const penjualLng = 106.696360;
+const hargaPerKm = 5000;
+const penjualLat = -6.259853;
+const penjualLng = 106.696360;
 
-  let items = JSON.parse(localStorage.getItem('menuItems')) || [
-    {id:1,nama:"Nastar Original",harga:60000,img:"n1.jpg",qty:0},
-    {id:2,nama:"Nastar Keju",harga:65000,img:"n2.jpg",qty:0}
-  ];
+// Password Admin
+const ADMIN_PASS = "1234";
 
-  const menuContainer = document.getElementById('menuContainer');
-  const jumlahKeranjang = document.getElementById('jumlahKeranjang');
-  const keranjang = document.getElementById('keranjang');
+// Item Menu
+let items = JSON.parse(localStorage.getItem('items')) || [
+  {id:1,name:"Nastar Original",price:60000,img:"n1.jpg"},
+  {id:2,name:"Nastar Keju",price:65000,img:"n2.jpg"}
+];
 
-  function renderMenu() {
-    menuContainer.innerHTML = '<h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu🍪</h2>';
-    items.forEach(item=>{
-      const div = document.createElement('div');
-      div.className = "bg-[#FFFDF9] p-4 rounded-xl shadow mb-4 border border-[#F3D7B6]";
-      div.innerHTML = `
-        <img src="${item.img}" class="w-full h-40 object-cover rounded-xl mb-2">
-        <h3 class="font-semibold text-lg text-[#6B4226]">${item.nama}</h3>
-        <p class="text-[#C58940] font-bold">Rp${item.harga.toLocaleString()}</p>
-        <input type="number" min="0" value="${item.qty}" data-id="${item.id}" class="w-full mt-2 p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0] inputQty">
-      `;
-      menuContainer.appendChild(div);
-    });
-    attachQtyListeners();
-    renderAdminPanel();
+// Render menu
+function renderMenu(){
+  const container = document.getElementById('menuContainer');
+  container.innerHTML = '<h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu 🍪</h2>';
+  items.forEach(item=>{
+    const div = document.createElement('div');
+    div.className="bg-[#FFFDF9] p-4 rounded-xl shadow mb-4 border border-[#F3D7B6]";
+    div.innerHTML = `
+      <img src="${item.img}" class="w-full h-40 object-cover rounded-xl mb-2">
+      <h3 class="font-semibold text-lg text-[#6B4226]">${item.name}</h3>
+      <p class="text-[#C58940] font-bold">Rp${item.price.toLocaleString()}</p>
+      <input type="number" min="0" value="0" id="qty${item.id}" class="w-full mt-2 p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]">`;
+    container.appendChild(div);
+    attachKeranjang(`qty${item.id}`);
+  });
+}
+
+// Admin login
+function adminLogin(val){
+  if(val==="login"){ document.getElementById('adminPanel').classList.remove('hidden'); }
+}
+
+// Cek password admin
+function cekAdmin(){
+  const pass = document.getElementById('adminPass').value;
+  if(pass===ADMIN_PASS){
+    document.getElementById('adminActions').classList.remove('hidden');
+    alert("Login admin berhasil!");
+  }else{ alert("Password salah!"); }
+}
+
+// Tambah/Update Item
+function tambahItem(){
+  const name = document.getElementById('itemName').value.trim();
+  const price = parseInt(document.getElementById('itemPrice').value)||0;
+  const img = document.getElementById('itemImg').value.trim();
+  if(!name||price<=0||!img){ alert("Isi semua data item!"); return; }
+  const existing = items.find(i=>i.name===name);
+  if(existing){ existing.price=price; existing.img=img; }else{ items.push({id:Date.now(),name:name,price:price,img:img}); }
+  localStorage.setItem('items', JSON.stringify(items));
+  renderMenu();
+  alert("Item berhasil ditambahkan/diupdate!");
+}
+
+// Keranjang
+const keranjang = document.getElementById("keranjang");
+const jumlahKeranjang = document.getElementById("jumlahKeranjang");
+function updateKeranjang(qty){
+  let current = parseInt(jumlahKeranjang.innerText);
+  jumlahKeranjang.innerText = current + qty;
+  keranjang.style.animation="goyang 0.5s";
+  setTimeout(()=>{keranjang.style.animation="";},500);
+}
+
+// Attach input qty
+function attachKeranjang(idInput){
+  const input = document.getElementById(idInput);
+  input.addEventListener('input', function(){
     hitungTotal();
-  }
+    const val = parseInt(this.value)||0;
+    renderKeranjangTotal();
+  });
+}
 
-  function attachQtyListeners(){
-    document.querySelectorAll('.inputQty').forEach(input=>{
-      input.addEventListener('input',()=>{
-        const id = parseInt(input.dataset.id);
-        const qty = parseInt(input.value) || 0;
-        const item = items.find(i=>i.id===id);
-        item.qty = qty;
-        updateKeranjang();
-        hitungTotal();
-        saveItems();
-      });
+// Hitung Total
+function hitungTotal(){
+  let total = 0;
+  items.forEach(item=>{
+    const qty = parseInt(document.getElementById(`qty${item.id}`).value)||0;
+    total += qty*item.price;
+  });
+  const ongkir = parseInt(document.getElementById('ongkir').value)||0;
+  total += ongkir;
+  document.getElementById('total').innerText="Rp"+total.toLocaleString();
+}
+
+// Render keranjang total
+function renderKeranjangTotal(){
+  let totalQty=0;
+  items.forEach(item=>{
+    totalQty += parseInt(document.getElementById(`qty${item.id}`).value)||0;
+  });
+  jumlahKeranjang.innerText=totalQty;
+  keranjang.style.animation="goyang 0.5s";
+  setTimeout(()=>{keranjang.style.animation="";},500);
+}
+
+// Geolocation
+function ambilLokasi(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(pos){
+      const lat=pos.coords.latitude, lng=pos.coords.longitude;
+      document.getElementById('alamatAuto').value=`https://www.google.com/maps?q=${lat},${lng}`;
+      const jarak = hitungJarak(penjualLat,penjualLng,lat,lng);
+      const biaya = Math.ceil(jarak)*hargaPerKm;
+      document.getElementById('ongkirText').innerText=`Jarak: ${jarak.toFixed(2)} km | Ongkir COD: Rp${biaya.toLocaleString()}`;
+      document.getElementById('ongkir').value=biaya;
+      hitungTotal();
     });
-  }
+  }else{ alert("Geolocation tidak didukung."); }
+}
+function hitungJarak(lat1,lng1,lat2,lng2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  const c=2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R*c;
+}
 
-  function updateKeranjang(){
-    let totalQty = items.reduce((acc,i)=>acc+i.qty,0);
-    jumlahKeranjang.innerText = totalQty;
-    keranjang.style.animation="goyang 0.5s";
-    setTimeout(()=>keranjang.style.animation="",500);
-  }
-
-  function hitungTotal(){
-    let total = items.reduce((acc,i)=>acc+i.qty*i.harga,0);
-    total += parseInt(document.getElementById('ongkir').value) || 0;
-    document.getElementById('total').innerText = "Rp"+total.toLocaleString();
-  }
-
-  function saveItems(){ localStorage.setItem('menuItems',JSON.stringify(items)); }
-
-  function ambilLokasi(){
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(pos=>{
-        let lat = pos.coords.latitude;
-        let lng = pos.coords.longitude;
-        document.getElementById('alamatAuto').value = `https://www.google.com/maps?q=${lat},${lng}`;
-        const jarak = hitungJarak(penjualLat,penjualLng,lat,lng);
-        const biaya = Math.ceil(jarak)*hargaPerKm;
-        document.getElementById('ongkirText').innerText=`Jarak: ${jarak.toFixed(2)} km | Ongkir COD: Rp${biaya.toLocaleString()}`;
-        document.getElementById('ongkir').value = biaya;
-        hitungTotal();
-      });
-    } else alert("Geolocation tidak didukung.");
-  }
-
-  function hitungJarak(lat1,lng1,lat2,lng2){
-    const R=6371;
-    const dLat=(lat2-lat1)*Math.PI/180;
-    const dLng=(lng2-lng1)*Math.PI/180;
-    const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-  }
-
-  function togglePembayaran(){
-    const metode=document.getElementById("metode").value;
-    document.getElementById("rekening").classList.toggle("hidden",metode!=="Transfer");
-    document.getElementById("bukti").classList.toggle("hidden",metode!=="Transfer");
-  }
-
-  function copyRek(){ navigator.clipboard.writeText(document.getElementById("norek").innerText); alert("Nomor rekening disalin!"); }
-
-  function togglePengiriman(){
-    const opsi=document.getElementById("opsiKirim").value;
-    document.getElementById("rekening").classList.toggle("hidden",opsi!=="Transfer");
-    document.getElementById("bukti").classList.toggle("hidden",opsi!=="Transfer");
-    if(opsi==="PickUp"){
-      document.getElementById("alamatBlock").style.display="none";
-      document.getElementById("ongkirText").innerText="Ambil Sendiri / Pick Up - Gratis Ongkir";
-      document.getElementById("ongkir").value=0;
-    } else {
-      document.getElementById("alamatBlock").style.display="block";
-      document.getElementById("ongkirText").innerText="Ambil lokasi untuk menghitung ongkir COD...";
-      document.getElementById("ongkir").value=0;
-    }
-    hitungTotal();
-  }
-  togglePengiriman();
-
-  function checkout(){
-    let pesan="Bunda Zein , saya mau pesan:%0A";
-    items.forEach(i=>{ if(i.qty>0) pesan+=`- ${i.nama}: ${i.qty} toples%0A`; });
-    const opsiKirim=document.getElementById("opsiKirim").value;
-    if(opsiKirim!=="PickUp"){
-      pesan+=`%0AAlamat Otomatis: ${document.getElementById('alamatAuto').value}%0ADetail Alamat: ${document.getElementById('alamatDetail').value}%0A`;
-    } else pesan+=`%0ASaya akan mengambil sendiri / Pick Up (Gratis Ongkir)%0A`;
-    pesan+=`Ongkir: ${document.getElementById('ongkirText').innerText}%0AMetode: ${document.getElementById('metode').value}%0A`;
-    let total=items.reduce((acc,i)=>acc+i.qty*i.harga,0)+parseInt(document.getElementById('ongkir').value)||0;
-    pesan+=`Total: Rp${total.toLocaleString()}`;
-    window.location.href=`https://wa.me/6289610554134?text=${pesan}`;
-  }
-
-  // Admin login sederhana
-  const ADMIN_PASSWORD="260991Eki";
-  const adminPanel=document.getElementById("adminPanel");
-  function adminLogin(){
-    const pass=prompt("Masukkan password admin:");
-    if(pass===ADMIN_PASSWORD) adminPanel.style.display="block";
-    else alert("Password salah!");
-  }
-
-  // Admin actions
-  function renderAdminPanel(){
-    const container=document.getElementById("adminItemsContainer");
-    container.innerHTML="";
-    items.forEach(i=>{
-      const div=document.createElement("div");
-      div.innerHTML=`${i.nama} - Rp${i.harga.toLocaleString()}
-      <button class="admin-btn" onclick="editItem(${i.id})">Edit</button>
-      <button class="admin-btn" onclick="hapusItem(${i.id})">Hapus</button>`;
-      container.appendChild(div);
-    });
-  }
-
-  function tambahItem(){
-    const nama=prompt("Nama item baru:");
-    const harga=parseInt(prompt("Harga item baru:"));
-    const img=prompt("URL/Gambar item:");
-    if(nama && harga && img){
-      const id=items.length?Math.max(...items.map(i=>i.id))+1:1;
-      items.push({id,nama,harga,img,qty:0});
-      saveItems(); renderMenu();
-    }
-  }
-
-  function editItem(id){
-    const item=items.find(i=>i.id===id);
-    const nama=prompt("Nama item:",item.nama);
-    const harga=parseInt(prompt("Harga item:",item.harga));
-    const img=prompt("URL/Gambar item:",item.img);
-    if(nama && harga && img){
-      item.nama=nama; item.harga=harga; item.img=img;
-      saveItems(); renderMenu();
-    }
-  }
+// Toggle 
