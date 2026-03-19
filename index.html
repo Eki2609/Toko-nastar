@@ -1,326 +1,179 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nastar</title>
+  <title>Zein Kitchen</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Animasi Ramadhan & Kue Kering -->
   <style>
+    body { font-family: sans-serif; overflow-x: hidden; }
     .animasi-ramadhan {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 10;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; overflow: hidden; z-index: 10;
     }
-
-    .bintang, .bulan {
-      position: absolute;
-      width: 20px; height: 20px;
-      background: gold;
-      border-radius: 50%;
-      animation: turun 15s linear infinite;
-    }
-
-    .bulan {
-      width: 30px; height: 30px;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-    }
-
-    .kue {
-      position: absolute;
-      width: 30px; height: 30px;
-      background: #F4A460;
-      border-radius: 50%;
-      animation: melayang 10s linear infinite;
-    }
+    .bintang, .bulan { position: absolute; background: gold; border-radius: 50%; }
+    .bintang { width: 20px; height: 20px; animation: turun 15s linear infinite; }
+    .bulan { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); animation: turun 18s linear infinite; }
+    .kue { position: absolute; width: 30px; height: 30px; background: #F4A460; border-radius: 50%; animation: melayang 10s linear infinite; }
 
     @keyframes turun {
-      0% { top: -50px; transform: translateX(0); opacity: 0; }
-      50% { opacity: 1; }
-      100% { top: 100%; transform: translateX(100px); opacity: 0; }
+      0% { top:-50px; transform:translateX(0); opacity:0; }
+      50% { opacity:1; }
+      100% { top:100%; transform:translateX(100px); opacity:0; }
     }
-
     @keyframes melayang {
-      0% { top: 100%; left: 10%; transform: rotate(0deg); }
-      50% { transform: rotate(180deg); }
-      100% { top: -50px; left: 90%; transform: rotate(360deg); }
+      0% { top:100%; left:10%; transform:rotate(0deg);}
+      50% { transform:rotate(180deg);}
+      100% { top:-50px; left:90%; transform:rotate(360deg);}
     }
+    @keyframes goyang { 0%{rotate:0deg;}25%{rotate:15deg;}50%{rotate:-15deg;}75%{rotate:10deg;}100%{rotate:0deg;} }
 
-    /* Keranjang goyang */
-    @keyframes goyang {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(15deg); }
-      50% { transform: rotate(-15deg); }
-      75% { transform: rotate(10deg); }
-      100% { transform: rotate(0deg); }
+    /* Kunci versi mobile */
+    @media (min-width: 480px) {
+      body { zoom: 0.5; }
     }
   </style>
 </head>
 <body class="bg-[#FFF8F0] text-[#5A3E2B]">
 
-  <!-- Animasi Ramadhan Overlay -->
-  <div class="animasi-ramadhan">
-    <div class="bulan" style="left:10%; animation-duration: 18s;"></div>
-    <div class="bintang" style="left:30%; animation-duration: 12s;"></div>
-    <div class="bintang" style="left:60%; animation-duration: 16s;"></div>
-    <div class="bintang" style="left:80%; animation-duration: 20s;"></div>
+<!-- Animasi Ramadhan -->
+<div class="animasi-ramadhan">
+  <div class="bulan" style="left:10%;"></div>
+  <div class="bintang" style="left:30%;"></div>
+  <div class="bintang" style="left:60%;"></div>
+  <div class="bintang" style="left:80%;"></div>
+  <div class="kue" style="left:15%;"></div>
+  <div class="kue" style="left:50%;"></div>
+  <div class="kue" style="left:75%;"></div>
+</div>
 
-    <div class="kue" style="left:15%; animation-duration:12s;"></div>
-    <div class="kue" style="left:50%; animation-duration:15s;"></div>
-    <div class="kue" style="left:75%; animation-duration:18s;"></div>
+<!-- Hero -->
+<div class="text-center p-5 bg-[#FDEBD0] shadow">
+  <h1 class="text-2xl font-bold text-[#8B4513]">Zein Kitchen</h1>
+  <p class="text-[#A67C52]">Manis, Gurih & Nagih</p>
+</div>
+
+<!-- Admin Login -->
+<div class="p-4 bg-[#FFFDF9] shadow mb-4 rounded-xl">
+  <label class="font-semibold">Admin Password:</label>
+  <input type="password" id="adminPass" class="w-full p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]" placeholder="Masukkan password admin">
+  <button onclick="loginAdmin()" class="mt-2 w-full bg-[#C58940] text-white p-2 rounded">Login Admin</button>
+</div>
+
+<!-- Menu -->
+<div class="p-4" id="menuContainer">
+  <h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu 🍪</h2>
+  <!-- Menu items akan di-render di sini -->
+</div>
+
+<!-- Keranjang -->
+<div id="keranjang" class="fixed bottom-5 right-5 w-16 h-16 bg-[#C58940] rounded-full shadow-lg flex items-center justify-center cursor-pointer z-20">
+  🛒 <span id="jumlahKeranjang" class="ml-1 font-bold text-white">0</span>
+</div>
+
+<!-- Total & Checkout -->
+<div class="p-4">
+  <div class="bg-[#FDEBD0] p-4 rounded-xl shadow text-center border border-[#F3D7B6]">
+    <p class="text-[#6B4226]">Total Harga:</p>
+    <h2 id="total" class="text-2xl font-bold text-[#8B4513]">Rp0</h2>
   </div>
+</div>
+<div class="p-4">
+  <button onclick="checkout()" class="w-full bg-[#C58940] hover:bg-[#A9712A] text-white p-3 rounded-xl transition">
+    Checkout via WhatsApp
+  </button>
+</div>
 
-  <!-- Hero -->
-  <div class="text-center p-5 bg-[#FDEBD0] shadow">
-    <h1 class="text-2xl font-bold text-[#8B4513]">Zein Kitchen</h1>
-    <p class="text-[#A67C52]">Manis, Gurih & Nagih</p>
-  </div>
+<script>
+const hargaPerKm = 5000;
+const penjualLat = -6.259853;
+const penjualLng = 106.696360;
 
-  <!-- Menu -->
-  <div class="p-4">
-    <h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu🍪</h2>
+let menu = [
+  {id:1, nama:"Nastar Original", harga:60000, gambar:"n1.jpg"},
+  {id:2, nama:"Nastar Keju", harga:65000, gambar:"n2.jpg"}
+];
 
-    <div class="bg-[#FFFDF9] p-4 rounded-xl shadow mb-4 border border-[#F3D7B6]">
-      <img src="n1.jpg" class="w-full h-40 object-cover rounded-xl mb-2">
-      <h3 class="font-semibold text-lg text-[#6B4226]">Nastar Original</h3>
-      <p class="text-[#C58940] font-bold">Rp60.000</p>
-      <input type="number" id="qty1" value="0" min="0" class="w-full mt-2 p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]">
-    </div>
+let adminMode = false;
+let keranjangTotal = 0;
 
-    <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
-      <img src="n2.jpg" class="w-full h-40 object-cover rounded-xl mb-2">
-      <h3 class="font-semibold text-lg text-[#6B4226]">Nastar Keju</h3>
-      <p class="text-[#C58940] font-bold">Rp65.000</p>
-      <input type="number" id="qty2" value="0" min="0" class="w-full mt-2 p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]">
-    </div>
-  </div>
+// Render menu
+function renderMenu(){
+  const container = document.getElementById("menuContainer");
+  container.innerHTML = '<h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu 🍪</h2>';
+  menu.forEach(item=>{
+    const div = document.createElement("div");
+    div.className = "bg-[#FFFDF9] p-4 rounded-xl shadow mb-4 border border-[#F3D7B6]";
+    div.innerHTML = `
+      <img src="${item.gambar}" class="w-full h-40 object-cover rounded-xl mb-2">
+      <h3 class="font-semibold text-lg text-[#6B4226]">${item.nama}</h3>
+      <p class="text-[#C58940] font-bold">Rp${item.harga.toLocaleString()}</p>
+      <input type="number" min="0" value="0" data-id="${item.id}" class="w-full mt-2 p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0] menuQty" ${adminMode?'':'oninput="updateCart(this)"'}>
+      ${adminMode?`<button onclick="editItem(${item.id})" class="mt-2 w-full bg-[#8B4513] text-white p-2 rounded">Edit Item</button>`:''}
+    `;
+    container.appendChild(div);
+  });
+}
 
-  <!-- Alamat & Pengiriman -->
-  <div class="p-4">
-    <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
-      <h2 class="font-bold mb-2 text-[#8B4513]">Alamat Pengiriman 📍</h2>
+// Update keranjang
+function updateCart(input){
+  let qty = parseInt(input.value)||0;
+  let id = parseInt(input.dataset.id);
+  let prevTotal = keranjangTotal;
+  keranjangTotal = 0;
+  document.querySelectorAll(".menuQty").forEach(inp=>{
+    let i = menu.find(m=>m.id==inp.dataset.id);
+    keranjangTotal += (parseInt(inp.value)||0) * i.harga;
+  });
+  document.getElementById("total").innerText = "Rp"+keranjangTotal.toLocaleString();
+  if(prevTotal != keranjangTotal){
+    const cart = document.getElementById("keranjang");
+    cart.style.animation = "goyang 0.5s";
+    setTimeout(()=>{cart.style.animation='';},500);
+    let jumlah = 0;
+    document.querySelectorAll(".menuQty").forEach(i=>{jumlah+=parseInt(i.value)||0});
+    document.getElementById("jumlahKeranjang").innerText = jumlah;
+  }
+}
 
-      <label class="text-sm font-semibold mb-1">Opsi Pengiriman</label>
-      <select id="opsiKirim" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" onchange="togglePengiriman()">
-        <option value="COD">🛵 COD (Bayar di Tempat)</option>
-        <option value="PickUp">🎒 Ambil Sendiri / Pick Up (Gratis)</option>
-        <option value="Transfer">🏦 Transfer Bank</option>
-      </select>
+// Checkout
+function checkout(){
+  let pesan = "Bunda Zein , saya mau pesan:%0A";
+  menu.forEach(item=>{
+    let qty = parseInt(document.querySelector(`[data-id='${item.id}']`).value)||0;
+    if(qty>0) pesan += `- ${item.nama}: ${qty} toples%0A`;
+  });
+  pesan += `Total: Rp${keranjangTotal.toLocaleString()}`;
+  window.location.href = `https://wa.me/6289610554134?text=${pesan}`;
+}
 
-      <div id="alamatBlock">
-        <label class="text-sm font-semibold mb-1">Lokasi Otomatis</label>
-        <textarea id="alamatAuto" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" placeholder="Klik ambil lokasi otomatis" readonly></textarea>
-        <button onclick="ambilLokasi()" 
-          class="w-full bg-[#8B4513] hover:bg-[#6B2E12] text-white p-2 rounded transition mb-4">
-          📍 Ambil Lokasi Otomatis
-        </button>
+// Admin login
+function loginAdmin(){
+  const pw = document.getElementById("adminPass").value;
+  if(pw==="260991Eki"){ // password sederhana
+    adminMode=true;
+    alert("Mode Admin aktif");
+    renderMenu();
+  } else {
+    alert("Password salah!");
+  }
+}
 
-        <label class="text-sm font-semibold mb-1">Detail Alamat</label>
-        <textarea id="alamatDetail" class="w-full p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]" placeholder="Tambahkan detail alamat, nomor rumah, catatan kurir"></textarea>
-      </div>
-    </div>
-  </div>
+// Edit item admin
+function editItem(id){
+  let item = menu.find(i=>i.id==id);
+  let newName = prompt("Nama Item:", item.nama);
+  if(newName) item.nama=newName;
+  let newPrice = prompt("Harga Item:", item.harga);
+  if(newPrice) item.harga=parseInt(newPrice);
+  let newImg = prompt("URL Gambar Item:", item.gambar);
+  if(newImg) item.gambar=newImg;
+  renderMenu();
+}
 
-  <!-- Ongkir -->
-  <div class="p-4">
-    <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
-      <h2 class="font-bold mb-2 text-[#8B4513]">Ongkir 🚚</h2>
-      <p id="ongkirText">Ambil lokasi untuk menghitung ongkir COD...</p>
-      <input type="hidden" id="ongkir" value="0">
-    </div>
-  </div>
-
-  <!-- Pembayaran -->
-  <div class="p-4">
-    <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
-      <h2 class="font-bold mb-2 text-[#8B4513]">Metode Pembayaran 💳</h2>
-
-      <select id="metode" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" onchange="togglePembayaran()">
-        <option value="COD">COD (Bayar di Tempat)</option>
-        <option value="Transfer">Transfer Bank</option>
-      </select>
-
-      <div id="rekening" class="hidden bg-[#FDEBD0] p-3 rounded mb-2 text-sm">
-        <div class="flex items-center gap-2 mb-2">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" class="w-16">
-          <span class="font-semibold">Bank BCA</span>
-        </div>
-        <p>No Rekening: <span id="norek" class="font-bold">3450062480</span></p>
-        <p>Atas Nama: <span class="font-bold">Eki Aryadi</span></p>
-
-        <button onclick="copyRek()" class="bg-[#C58940] text-white px-3 py-1 rounded mt-2">
-          Copy No Rekening
-        </button>
-      </div>
-
-      <div id="bukti" class="hidden">
-        <label class="text-sm">Upload Bukti Transfer</label>
-        <input type="file" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]">
-      </div>
-    </div>
-  </div>
-
-  <!-- Total -->
-  <div class="p-4">
-    <div class="bg-[#FDEBD0] p-4 rounded-xl shadow text-center border border-[#F3D7B6]">
-      <p class="text-[#6B4226]">Total Harga:</p>
-      <h2 id="total" class="text-2xl font-bold text-[#8B4513]">Rp0</h2>
-    </div>
-  </div>
-
-  <!-- Checkout -->
-  <div class="p-4">
-    <button onclick="checkout()" class="w-full bg-[#C58940] hover:bg-[#A9712A] text-white p-3 rounded-xl transition">
-      Checkout via WhatsApp
-    </button>
-  </div>
-
-  <!-- Keranjang Belanja -->
-  <div id="keranjang" class="fixed bottom-5 right-5 w-16 h-16 bg-[#C58940] rounded-full shadow-lg flex items-center justify-center cursor-pointer z-20">
-    🛒 <span id="jumlahKeranjang" class="ml-1 font-bold text-white">0</span>
-  </div>
-
-  <script>
-    const harga1 = 60000;
-    const harga2 = 65000;
-    const hargaPerKm = 5000;
-
-    const penjualLat = -6.259853;
-    const penjualLng = 106.696360;
-
-    // Hitung total
-    function hitungTotal(){
-      let q1 = parseInt(document.getElementById('qty1').value) || 0;
-      let q2 = parseInt(document.getElementById('qty2').value) || 0;
-      let ongkir = parseInt(document.getElementById('ongkir').value) || 0;
-
-      let total = (q1 * harga1) + (q2 * harga2) + ongkir;
-      document.getElementById('total').innerText = "Rp" + total.toLocaleString();
-    }
-
-    document.getElementById('qty1').addEventListener('input', hitungTotal);
-    document.getElementById('qty2').addEventListener('input', hitungTotal);
-
-    // Geolocation
-    function ambilLokasi(){
-      if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(function(position){
-          let lat = position.coords.latitude;
-          let lng = position.coords.longitude;
-
-          document.getElementById('alamatAuto').value = `https://www.google.com/maps?q=${lat},${lng}`;
-
-          const jarak = hitungJarak(penjualLat, penjualLng, lat, lng);
-          const biaya = Math.ceil(jarak) * hargaPerKm;
-
-          document.getElementById('ongkirText').innerText = `Jarak: ${jarak.toFixed(2)} km | Ongkir COD: Rp${biaya.toLocaleString()}`;
-          document.getElementById('ongkir').value = biaya;
-
-          hitungTotal();
-        });
-      } else {
-        alert("Geolocation tidak didukung di perangkat ini.");
-      }
-    }
-
-    function hitungJarak(lat1, lng1, lat2, lng2){
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    }
-
-    function togglePembayaran(){
-      const metode = document.getElementById("metode").value;
-      document.getElementById("rekening").classList.toggle("hidden", metode !== "Transfer");
-      document.getElementById("bukti").classList.toggle("hidden", metode !== "Transfer");
-    }
-
-    function copyRek(){
-      navigator.clipboard.writeText(document.getElementById("norek").innerText);
-      alert("Nomor rekening disalin!");
-    }
-
-    function togglePengiriman(){
-      const opsi = document.getElementById("opsiKirim").value;
-
-      document.getElementById("rekening").classList.toggle("hidden", opsi !== "Transfer");
-      document.getElementById("bukti").classList.toggle("hidden", opsi !== "Transfer");
-
-      if(opsi === "PickUp"){
-        document.getElementById("alamatBlock").style.display = "none";
-        document.getElementById("ongkirText").innerText = "Ambil Sendiri / Pick Up - Gratis Ongkir";
-        document.getElementById("ongkir").value = 0;
-      } else {
-        document.getElementById("alamatBlock").style.display = "block";
-        document.getElementById("ongkirText").innerText = "Ambil lokasi untuk menghitung ongkir COD...";
-        document.getElementById("ongkir").value = 0;
-      }
-      hitungTotal();
-    }
-
-    togglePengiriman();
-
-    // Checkout WhatsApp
-    function checkout(){
-      let q1 = parseInt(document.getElementById('qty1').value) || 0;
-      let q2 = parseInt(document.getElementById('qty2').value) || 0;
-      let alamatAuto = document.getElementById('alamatAuto').value;
-      let alamatDetail = document.getElementById('alamatDetail').value;
-      let ongkirText = document.getElementById('ongkirText').innerText;
-      let ongkir = parseInt(document.getElementById('ongkir').value) || 0;
-      let metode = document.getElementById('metode').value;
-      let opsiKirim = document.getElementById('opsiKirim').value;
-
-      let pesan = "Bunda Zein , saya mau pesan:%0A";
-      if(q1>0) pesan += `- Nastar Original: ${q1} toples%0A`;
-      if(q2>0) pesan += `- Nastar Keju: ${q2} toples%0A`;
-
-      if(opsiKirim !== "PickUp"){
-        pesan += `%0AAlamat Otomatis: ${alamatAuto}%0A`;
-        pesan += `Detail Alamat: ${alamatDetail}%0A`;
-      } else {
-        pesan += `%0ASaya akan mengambil sendiri / Pick Up (Gratis Ongkir)%0A`;
-      }
-
-      pesan += `Ongkir: ${ongkirText}%0A`;
-      pesan += `Metode: ${metode}%0A`;
-
-      let total = (q1*harga1) + (q2*harga2) + ongkir;
-      pesan += `Total: Rp${total.toLocaleString()}`;
-
-      window.location.href = `https://wa.me/6289610554134?text=${pesan}`;
-    }
-
-    // Keranjang Belanja
-    const keranjang = document.getElementById("keranjang");
-    const jumlahKeranjang = document.getElementById("jumlahKeranjang");
-
-    function updateKeranjang(qty){
-      let current = parseInt(jumlahKeranjang.innerText);
-      jumlahKeranjang.innerText = current + qty;
-
-      keranjang.style.animation = "goyang 0.5s";
-      setTimeout(()=>{ keranjang.style.animation = ""; }, 500);
-    }
-
-    function attachKeranjang(idInput){
-      const input = document.getElementById(idInput);
-      input.addEventListener('change', function(){
-        const qty = parseInt(this.value) || 0;
-        updateKeranjang(qty);
-        hitungTotal();
-      });
-    }
-
-    attachKeranjang("qty1");
-    attachKeranjang("qty2");
-  </script>
+renderMenu();
+</script>
 </body>
 </html>
