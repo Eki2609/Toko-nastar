@@ -13,7 +13,7 @@
   #floatingCart img{width:32px;height:32px;}
   .goyang{animation:goyang 0.5s ease-in-out;}
   @keyframes goyang {0%{transform:rotate(0deg);}25%{transform:rotate(-15deg);}50%{transform:rotate(15deg);}75%{transform:rotate(-10deg);}100%{transform:rotate(0deg);}}
-  #cartPopup{position: fixed; inset:0; background: rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:50;}
+  #cartPopup{position: fixed; inset:0; background: rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:50;}
   #cartPopupContent{background:#FFFDF9; padding:1rem; border-radius:0.5rem; width:80%; max-width:400px; position:relative;}
 </style>
 </head>
@@ -23,13 +23,17 @@
 
 <!-- Menu -->
 <div class="mb-4">
-  <div class="mb-2">
-    <p>Nastar Original - Rp60.000</p>
-    <input type="number" id="qty1" value="0" min="0" class="p-2 border rounded mb-2 w-full">
+  <div class="bg-[#FFFDF9] p-4 rounded-xl shadow mb-4 border border-[#F3D7B6]">
+    <img src="n1.jpg" class="w-full h-40 object-cover rounded-xl mb-2">
+    <h3 class="font-semibold text-lg text-[#6B4226]">Nastar Original</h3>
+    <p class="text-[#C58940] font-bold">Rp60.000</p>
+    <input type="number" id="qty1" value="0" min="0" class="w-full mt-2 p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]">
   </div>
-  <div class="mb-2">
-    <p>Nastar Keju - Rp65.000</p>
-    <input type="number" id="qty2" value="0" min="0" class="p-2 border rounded w-full">
+  <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
+    <img src="n2.jpg" class="w-full h-40 object-cover rounded-xl mb-2">
+    <h3 class="font-semibold text-lg text-[#6B4226]">Nastar Keju</h3>
+    <p class="text-[#C58940] font-bold">Rp65.000</p>
+    <input type="number" id="qty2" value="0" min="0" class="w-full mt-2 p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]">
   </div>
 </div>
 
@@ -61,7 +65,7 @@
   </select>
   <div id="rekening" class="hidden bg-[#FDEBD0] p-3 rounded mt-2">
     <div class="flex items-center gap-2 mb-2">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" class="w-16">
+      <img src="norek-bca.jpg" class="w-16">
       <span class="font-semibold">Bank BCA</span>
     </div>
     <p>No Rekening: <span id="norek" class="font-bold">3450062480</span></p>
@@ -82,12 +86,12 @@
 
 <!-- Keranjang Melayang -->
 <div id="floatingCart">
-  <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png">
+  <img src="cart-icon.png">
   <span id="cartCount">0</span>
 </div>
 
 <!-- Popup Keranjang -->
-<div id="cartPopup" class="hidden">
+<div id="cartPopup">
   <div id="cartPopupContent">
     <h2 class="text-lg font-bold mb-2">Keranjang Belanja</h2>
     <div id="popupItems" class="mb-2"></div>
@@ -159,6 +163,7 @@ function ambilLokasi(){
     });
   } else alert("Geolocation tidak didukung");
 }
+
 function resetLokasi(){
   marker.setLatLng([penjualLat,penjualLng]); map.setView([penjualLat,penjualLng],13);
   document.getElementById('alamatAuto').value="";
@@ -221,11 +226,11 @@ function showCartPopup(){
   if(alamat) document.getElementById('popupAlamat').innerText="Alamat: "+alamat+" "+alamatDetail;
   else document.getElementById('popupAlamat').innerText="Pick Up / Ambil Sendiri";
 
-  document.getElementById('cartPopup').classList.remove('hidden');
+  document.getElementById('cartPopup').style.display='flex';
 }
 
 function closePopup(){
-  document.getElementById('cartPopup').classList.add('hidden');
+  document.getElementById('cartPopup').style.display='none';
 }
 
 togglePembayaran();
