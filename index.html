@@ -64,6 +64,12 @@ overflow:auto;
 </div>
 </div>
 
+<!-- PENGIRIMAN -->
+<select id="pengiriman" onchange="updatePengiriman()" class="w-full p-2 border mb-2">
+<option value="antar">🛵 Diantar</option>
+<option value="pickup">📦 Ambil Sendiri (Gratis Ongkir)</option>
+</select>
+
 <!-- ALAMAT -->
 <textarea id="alamatAuto" class="w-full p-2 border mb-2" readonly placeholder="Alamat otomatis"></textarea>
 <textarea id="alamatDetail" class="w-full p-2 border mb-2" placeholder="Detail alamat"></textarea>
@@ -89,11 +95,9 @@ overflow:auto;
 </select>
 
 <div id="rekening" class="hidden bg-yellow-100 p-3 rounded">
-<img src="https://logos-world.net/wp-content/uploads/2020/09/Bank-Central-Asia-BCA-Logo.png" class="w-24 mb-2">
-
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" class="w-24 mb-2">
 <p>No Rekening: <b id="norek">3450062480</b></p>
 <p>Atas Nama: <b>Eki Aryadi</b></p>
-
 <button onclick="copyRek()" class="bg-[#C58940] text-white w-full p-2 mt-2 rounded">
 Copy No Rekening
 </button>
@@ -118,7 +122,6 @@ Checkout WhatsApp
 <div id="popupItems"></div>
 <p id="popupOngkir"></p>
 <p id="popupTotal"></p>
-
 <button onclick="checkout()" class="bg-[#C58940] text-white w-full p-2 mt-2">Checkout</button>
 <button onclick="closePopup()" class="border w-full mt-2 p-2">Tutup</button>
 </div>
@@ -189,10 +192,13 @@ alamatAuto.value="Gagal ambil alamat";
 
 /* ONGKIR */
 function updateOngkir(){
+if(pengiriman.value=="pickup") return;
+
 let p=marker.getLatLng();
 getAlamat(p.lat,p.lng);
 let jarak=hitungJarak(penjual[0],penjual[1],p.lat,p.lng);
 let biaya=Math.ceil(jarak)*hargaPerKm;
+
 ongkirText.innerText=`Jarak ${jarak.toFixed(2)} km | Ongkir Rp${biaya.toLocaleString()}`;
 ongkir.value=biaya;
 hitungTotal();
@@ -200,10 +206,21 @@ hitungTotal();
 
 marker.on('dragend',updateOngkir);
 
-/* ⚡ AMBIL LOKASI SUPER CEPAT */
-function ambilLokasi(){
-alamatAuto.value="Mengambil lokasi...";
+/* PENGIRIMAN */
+function updatePengiriman(){
+if(pengiriman.value=="pickup"){
+ongkir.value=0;
+ongkirText.innerText="Ambil sendiri (Gratis Ongkir)";
+document.getElementById("map").style.display="none";
+}else{
+document.getElementById("map").style.display="block";
+updateOngkir();
+}
+hitungTotal();
+}
 
+/* LOKASI */
+function ambilLokasi(){
 navigator.geolocation.getCurrentPosition(
 pos=>{
 let lat=pos.coords.latitude;
@@ -214,33 +231,8 @@ map.setView([lat,lng],15);
 
 getAlamat(lat,lng);
 updateOngkir();
-},
-()=>{
-alamatAuto.value="Gagal ambil lokasi";
-},
-{
-enableHighAccuracy:false,
-timeout:8000,
-maximumAge:0
 }
 );
-
-/* fallback cepat */
-setTimeout(fallbackLokasi,3000);
-}
-
-/* fallback lokasi */
-async function fallbackLokasi(){
-try{
-let res=await fetch("https://ipapi.co/json/");
-let data=await res.json();
-
-marker.setLatLng([data.latitude,data.longitude]);
-map.setView([data.latitude,data.longitude],13);
-
-getAlamat(data.latitude,data.longitude);
-updateOngkir();
-}catch{}
 }
 
 function resetLokasi(){
@@ -265,8 +257,10 @@ let pesan="Bunda Zein, saya mau pesan:%0A";
 if(q1>0)pesan+=`- Nastar Original: ${q1}%0A`;
 if(q2>0)pesan+=`- Nastar Keju: ${q2}%0A`;
 
+pesan+=`%0APengiriman: ${pengiriman.value}%0A`;
+
 if(alamatAuto.value){
-pesan+=`%0AAlamat: ${alamatAuto.value}%0A${alamatDetail.value}%0A`;
+pesan+=`Alamat: ${alamatAuto.value}%0A${alamatDetail.value}%0A`;
 }
 
 pesan+=`Ongkir: ${ongkirText.innerText}%0A`;
