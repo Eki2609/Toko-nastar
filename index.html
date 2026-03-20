@@ -90,7 +90,7 @@
   </div>
 </div>
 
-<!-- Ongkir, Pembayaran, Total, Checkout tetap sama -->
+<!-- Ongkir -->
 <div class="p-4">
   <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
     <h2 class="font-bold mb-2 text-[#8B4513]">Ongkir 🚚</h2>
@@ -99,6 +99,7 @@
   </div>
 </div>
 
+<!-- Metode Pembayaran -->
 <div class="p-4">
   <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
     <h2 class="font-bold mb-2 text-[#8B4513]">Metode Pembayaran 💳</h2>
@@ -124,6 +125,7 @@
   </div>
 </div>
 
+<!-- Total -->
 <div class="p-4">
   <div class="bg-[#FDEBD0] p-4 rounded-xl shadow text-center border border-[#F3D7B6]">
     <p class="text-[#6B4226]">Total Harga:</p>
@@ -131,6 +133,7 @@
   </div>
 </div>
 
+<!-- Checkout -->
 <div class="p-4">
   <button onclick="checkout()" class="w-full bg-[#C58940] hover:bg-[#A9712A] text-white p-3 rounded-xl transition">
     Checkout via WhatsApp
@@ -268,7 +271,7 @@ function ambilLokasi(){
   },function(err){alert("Gagal mengambil lokasi: "+err.message);});
 }
 
-// Tambahkan tombol ambil lokasi
+// Tombol ambil lokasi
 const btnLokasi=document.createElement('button');
 btnLokasi.innerText="Ambil Lokasi Saya";
 btnLokasi.className="w-full bg-[#8B4513] hover:bg-[#6B2E12] text-white p-2 rounded mb-2";
@@ -283,8 +286,4 @@ function checkout(){
   let alamatDetail=document.getElementById('alamatDetail').value;
   let ongkirText=document.getElementById('ongkirText').innerText;
   let ongkir=parseInt(document.getElementById('ongkir').value)||0;
-  let metode=document.getElementById('metode').value;
-  let opsiKirim=document.getElementById('opsiKirim').value;
-
-  let pesan="Bunda Zein , saya mau pesan:%0A";
-  if(q1>0) pesan+=`-
+  let metode
