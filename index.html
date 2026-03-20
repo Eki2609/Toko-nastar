@@ -10,7 +10,6 @@
 
 <style>
 body{background:#FFF8F0;color:#5A3E2B;}
-
 #map{height:180px;border-radius:10px;}
 .leaflet-container{z-index:1!important;}
 
@@ -39,12 +38,12 @@ overflow:auto;
 
 <body class="p-4">
 
-<h1 class="text-center text-xl font-bold mb-4">Zein Kitchen</h1>
+<h1 class="text-center text-2xl font-bold mb-4">🍪 Zein Kitchen</h1>
 
 <!-- MENU -->
 <div class="grid grid-cols-2 gap-3 mb-4">
-
-<div class="bg-white p-3 rounded shadow">
+<div class="bg-white p-3 rounded shadow relative">
+<span class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">Best Seller</span>
 <img src="n1.jpg" class="w-full h-28 object-cover rounded mb-2">
 <h3 class="text-sm font-semibold">Nastar Original</h3>
 <p class="text-sm">Rp60.000</p>
@@ -55,7 +54,8 @@ overflow:auto;
 </div>
 </div>
 
-<div class="bg-white p-3 rounded shadow">
+<div class="bg-white p-3 rounded shadow relative">
+<span class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">Best Seller</span>
 <img src="n2.jpg" class="w-full h-28 object-cover rounded mb-2">
 <h3 class="text-sm font-semibold">Nastar Keju</h3>
 <p class="text-sm">Rp65.000</p>
@@ -65,7 +65,6 @@ overflow:auto;
 <button onclick="tambah(2)" class="bg-[#C58940] text-white px-2">+</button>
 </div>
 </div>
-
 </div>
 
 <!-- PENGIRIMAN -->
@@ -75,7 +74,7 @@ overflow:auto;
 </select>
 
 <!-- ALAMAT -->
-<textarea id="alamatAuto" class="w-full p-2 border mb-2" readonly placeholder="Alamat otomatis"></textarea>
+<textarea id="alamatAuto" class="w-full p-2 border mb-2" readonly placeholder="Alamat otomatis dari peta"></textarea>
 <textarea id="alamatDetail" class="w-full p-2 border mb-2" placeholder="Detail alamat"></textarea>
 
 <div id="map"></div>
@@ -102,16 +101,12 @@ overflow:auto;
 <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" class="w-24 mb-2">
 <p>No Rekening: <b id="norek">3450062480</b></p>
 <p>Atas Nama: <b>Eki Aryadi</b></p>
-<button onclick="copyRek()" class="bg-[#C58940] text-white w-full p-2 mt-2 rounded">
-Copy No Rekening
-</button>
+<button onclick="copyRek()" class="bg-[#C58940] text-white w-full p-2 mt-2 rounded">Copy No Rekening</button>
 </div>
 
 <p>Total: <span id="total">Rp0</span></p>
 
-<button onclick="checkout()" class="bg-[#C58940] text-white w-full p-2 mt-2">
-Checkout WhatsApp
-</button>
+<button onclick="checkout()" class="bg-[#C58940] text-white w-full p-2 mt-2">Checkout WhatsApp</button>
 
 <!-- CART -->
 <div id="floatingCart">
@@ -132,105 +127,83 @@ Checkout WhatsApp
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
 const harga1=60000,harga2=65000,hargaPerKm=5000;
 const penjual=[-6.259853,106.696360];
 
-/* TOTAL */
+/* TOTAL & CART */
 function hitungTotal(){
 let q1=+qty1.value||0,q2=+qty2.value||0,o=+ongkir.value||0;
 total.innerText="Rp"+((q1*harga1)+(q2*harga2)+o).toLocaleString();
+cartCount.innerText=q1+q2;
 }
 
-/* CART */
-function updateCart(){
-cartCount.innerText=(+qty1.value)+(+qty2.value);
-}
-
-function tambah(id){let e=document.getElementById('qty'+id);e.value++;hitungTotal();updateCart();}
-function kurang(id){let e=document.getElementById('qty'+id);if(e.value>0)e.value--;hitungTotal();updateCart();}
-qty1.oninput=qty2.oninput=()=>{hitungTotal();updateCart();};
+/* TAMBAH/KURANG */
+function tambah(id){let e=document.getElementById('qty'+id);e.value++;hitungTotal();}
+function kurang(id){let e=document.getElementById('qty'+id);if(e.value>0)e.value--;hitungTotal();}
+qty1.oninput=qty2.oninput=()=>{hitungTotal();};
 
 /* POPUP */
 floatingCart.onclick=()=>{
 let q1=+qty1.value||0,q2=+qty2.value||0;
-
 popupItems.innerHTML=`
 ${q1>0?`Nastar Original: ${q1}<br>`:""}
 ${q2>0?`Nastar Keju: ${q2}<br>`:""}
 `;
-
 popupOngkir.innerText=ongkirText.innerText;
 popupTotal.innerText="Total: "+total.innerText;
-
 cartPopup.style.display="flex";
 }
-
 function closePopup(){cartPopup.style.display="none";}
 window.onclick=e=>{if(e.target==cartPopup)cartPopup.style.display="none";}
 
 /* PEMBAYARAN */
-function togglePembayaran(){
-rekening.classList.toggle("hidden",metode.value!=="Transfer");
-}
-
-function copyRek(){
-navigator.clipboard.writeText(norek.innerText);
-alert("Nomor rekening disalin!");
-}
+function togglePembayaran(){rekening.classList.toggle("hidden",metode.value!=="Transfer");}
+function copyRek(){navigator.clipboard.writeText(norek.innerText);alert("Nomor rekening disalin!");}
 
 /* MAP */
 let map=L.map('map').setView(penjual,13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let marker=L.marker(penjual,{draggable:true}).addTo(map);
 
-/* JARAK */
-function hitungJarak(a,b,c,d){
-const R=6371;
-const dLat=(c-a)*Math.PI/180;
-const dLng=(d-b)*Math.PI/180;
-const x=Math.sin(dLat/2)**2+
-Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
-Math.sin(dLng/2)**2;
-return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+/* ALAMAT DARI PIN */
+async function getAlamat(lat,lng){
+try{
+let res=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+let data=await res.json();
+if(data.display_name)alamatAuto.value=data.display_name;
+}catch{alamatAuto.value="Gagal ambil alamat";}
 }
 
-/* ONGKIR */
+marker.on('dragend',()=>{let p=marker.getLatLng();getAlamat(p.lat,p.lng);updateOngkir();});
+
+/* HITUNG JARAK & ONGKIR */
+function hitungJarak(a,b,c,d){
+const R=6371,dLat=(c-a)*Math.PI/180,dLng=(d-b)*Math.PI/180;
+const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLng/2)**2;
+return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
 function updateOngkir(){
 if(pengiriman.value=="pickup") return;
-
 let p=marker.getLatLng();
 let jarak=hitungJarak(penjual[0],penjual[1],p.lat,p.lng);
 let biaya=Math.ceil(jarak)*hargaPerKm;
-
 ongkirText.innerText=`Jarak ${jarak.toFixed(2)} km | Ongkir Rp${biaya.toLocaleString()}`;
 ongkir.value=biaya;
 hitungTotal();
 }
-marker.on('dragend',updateOngkir);
 
 /* PENGIRIMAN */
 function updatePengiriman(){
 if(pengiriman.value=="pickup"){
-ongkir.value=0;
-ongkirText.innerText="Ambil sendiri (Gratis Ongkir)";
-
-alamatAuto.style.display="none";
-alamatDetail.style.display="none";
-map._container.style.display="none";
-btnLokasi.style.display="none";
-btnReset.style.display="none";
-btnMaps.style.display="none";
-
+ongkir.value=0; ongkirText.innerText="Ambil sendiri (Gratis Ongkir)";
+alamatAuto.style.display="none"; alamatDetail.style.display="none";
+map._container.style.display="none"; btnLokasi.style.display="none";
+btnReset.style.display="none"; btnMaps.style.display="none";
 }else{
-alamatAuto.style.display="block";
-alamatDetail.style.display="block";
-map._container.style.display="block";
-btnLokasi.style.display="block";
-btnReset.style.display="block";
-btnMaps.style.display="block";
-
+alamatAuto.style.display="block"; alamatDetail.style.display="block";
+map._container.style.display="block"; btnLokasi.style.display="block";
+btnReset.style.display="block"; btnMaps.style.display="block";
 updateOngkir();
 }
 hitungTotal();
@@ -239,24 +212,14 @@ hitungTotal();
 /* LOKASI */
 function ambilLokasi(){
 navigator.geolocation.getCurrentPosition(pos=>{
-let lat=pos.coords.latitude;
-let lng=pos.coords.longitude;
-
-marker.setLatLng([lat,lng]);
-map.setView([lat,lng],15);
-
-updateOngkir();
+let lat=pos.coords.latitude,lng=pos.coords.longitude;
+marker.setLatLng([lat,lng]); map.setView([lat,lng],15);
+getAlamat(lat,lng); updateOngkir();
 });
 }
+function resetLokasi(){marker.setLatLng(penjual);alamatAuto.value="";alamatDetail.value="";ongkir.value=0;ongkirText.innerText="Klik lokasi untuk hitung ongkir";hitungTotal();}
 
-function resetLokasi(){
-marker.setLatLng(penjual);
-ongkir.value=0;
-ongkirText.innerText="Klik lokasi untuk hitung ongkir";
-hitungTotal();
-}
-
-/* MAP LINK */
+/* LINK GOOGLE MAPS */
 function bukaMaps(){
 let p=marker.getLatLng();
 window.open(`https://www.google.com/maps?q=${p.lat},${p.lng}`);
@@ -266,25 +229,15 @@ window.open(`https://www.google.com/maps?q=${p.lat},${p.lng}`);
 function checkout(){
 let q1=+qty1.value||0,q2=+qty2.value||0,o=+ongkir.value||0;
 let p=marker.getLatLng();
-
 let pesan="Bunda Zein, saya mau pesan:%0A";
 if(q1>0)pesan+=`- Nastar Original: ${q1}%0A`;
 if(q2>0)pesan+=`- Nastar Keju: ${q2}%0A`;
-
 pesan+=`%0APengiriman: ${pengiriman.value}%0A`;
-
-if(pengiriman.value!=="pickup"){
-pesan+=`Lokasi: https://www.google.com/maps?q=${p.lat},${p.lng}%0A`;
-}
-
+if(pengiriman.value!=="pickup") pesan+=`Lokasi: https://www.google.com/maps?q=${p.lat},${p.lng}%0A`;
 pesan+=`Ongkir: ${ongkirText.innerText}%0A`;
 pesan+=`Metode: ${metode.value}%0A`;
 pesan+=`Total: Rp${((q1*harga1)+(q2*harga2)+o).toLocaleString()}`;
-
-if(metode.value=="Transfer"){
-pesan+=`%0ANo Rek: 3450062480`;
-}
-
+if(metode.value=="Transfer") pesan+=`%0ANo Rek: 3450062480`;
 window.location.href=`https://wa.me/6289610554134?text=${pesan}`;
 }
 </script>
