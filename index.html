@@ -1,137 +1,74 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zein Kitchen</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   body { background:#FFF8F0; color:#5A3E2B; }
-
-  /* Keranjang melayang */
   #floatingCart { position:fixed; bottom:20px; right:20px; background:#C58940; color:white; padding:10px 14px; border-radius:9999px; display:flex; align-items:center; gap:8px; cursor:pointer; z-index:50; transition: transform 0.2s; }
   #floatingCart img { width:32px; height:32px; }
-  @keyframes goyang {0%{transform:rotate(0deg);}25%{transform:rotate(15deg);}50%{transform:rotate(-15deg);}75%{transform:rotate(10deg);}100%{transform:rotate(0deg);}}
-  .goyang { animation:goyang 0.5s ease-in-out; }
-  #floatingCart:hover { transform: scale(1.1); }
-
-  /* Admin dropdown */
   #adminPanel { display:none; background:#FFFDF9; border:1px solid #F3D7B6; padding:10px; border-radius:8px; margin:10px 0; }
+  #map { width: 100%; height: 300px; border-radius:12px; margin-top:8px; }
 </style>
 </head>
-<body>
-
-<!-- Hero -->
-<div class="text-center p-5 bg-[#FDEBD0] shadow">
+<body><div class="text-center p-5 bg-[#FDEBD0] shadow">
   <h1 class="text-2xl font-bold text-[#8B4513]">Zein Kitchen</h1>
   <p class="text-[#A67C52]">Manis, Gurih & Nagih</p>
-</div>
-
-<!-- Admin login -->
-<div class="p-4">
+</div><!-- Admin login --><div class="p-4">
   <label class="font-semibold">Admin Login 🔑</label>
   <input type="password" id="adminPassword" class="border p-2 rounded w-full mb-2" placeholder="Masukkan password">
-  <button onclick="toggleAdmin()" class="bg-[#C58940] text-white p-2 rounded w-full">Masuk</button>
-
-  <div id="adminPanel">
+  <button onclick="toggleAdmin()" class="bg-[#C58940] text-white p-2 rounded w-full">Masuk</button>  <div id="adminPanel">
     <label class="font-semibold">Upload JSON Menu/Harga</label>
     <input type="file" id="jsonFile" class="border p-2 rounded w-full mb-2" accept=".json">
     <button onclick="loadJSON()" class="bg-[#8B4513] text-white p-2 rounded w-full">Update Menu</button>
-    <p class="text-sm mt-2 text-[#A67C52]">Format JSON: [{"id":1,"name":"Nastar Original","price":60000,"img":"n1.jpg"},...]</p>
+    <button onclick="downloadJSON()" class="bg-[#A9712A] text-white p-2 rounded w-full mt-2">Download JSON</button>
+    <p class="text-sm mt-2 text-[#A67C52]">Format JSON: [{"id":1,"name":"Nastar Original","price":60000,"img":"n1.jpg","desc":"Deskripsi kue"},...]</p>
   </div>
-</div>
-
-<!-- Menu -->
-<div class="p-4" id="menuContainer">
+</div><!-- Menu --><div class="p-4" id="menuContainer">
   <h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu 🍪</h2>
-</div>
-
-<!-- Alamat & Pengiriman -->
-<div class="p-4">
+</div><!-- Alamat & Pengiriman --><div class="p-4">
   <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
     <h2 class="font-bold mb-2 text-[#8B4513]">Alamat Pengiriman 📍</h2>
     <label class="text-sm font-semibold mb-1">Opsi Pengiriman</label>
-    <select id="opsiKirim" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" onchange="togglePengiriman()">
+    <select id="opsiKirim" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" onchange="resetLokasi()">
       <option value="COD">🛵 COD</option>
       <option value="PickUp">🎒 Pick Up</option>
       <option value="Transfer">🏦 Transfer</option>
-    </select>
+    </select><label class="text-sm font-semibold mb-1">Alamat Manual / Otomatis</label>
+<textarea id="alamatManual" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" placeholder="Masukkan alamat manual jika diperlukan"></textarea>
+<button onclick="ambilLokasi()" class="w-full bg-[#8B4513] text-white p-2 rounded mb-2">📍 Ambil Lokasi Otomatis</button>
 
-    <div id="alamatBlock">
-      <label class="text-sm font-semibold mb-1">Lokasi Otomatis</label>
-      <textarea id="alamatAuto" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" placeholder="Klik ambil lokasi otomatis" readonly></textarea>
-      <button onclick="ambilLokasi()" class="w-full bg-[#8B4513] text-white p-2 rounded mb-2">📍 Ambil Lokasi</button>
-      <label class="text-sm font-semibold mb-1">Detail Alamat</label>
-      <textarea id="alamatDetail" class="w-full p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]"></textarea>
-    </div>
+<div id="map"></div>
+
   </div>
-</div>
-
-<!-- Ongkir -->
-<div class="p-4">
+</div><!-- Ongkir --><div class="p-4">
   <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
     <h2 class="font-bold mb-2 text-[#8B4513]">Ongkir 🚚</h2>
     <p id="ongkirText">Ambil lokasi untuk menghitung ongkir COD...</p>
     <input type="hidden" id="ongkir" value="0">
   </div>
-</div>
-
-<!-- Metode Pembayaran -->
-<div class="p-4">
-  <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
-    <h2 class="font-bold mb-2 text-[#8B4513]">Metode Pembayaran 💳</h2>
-    <select id="metode" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]" onchange="togglePembayaran()">
-      <option value="COD">COD</option>
-      <option value="Transfer">Transfer Bank</option>
-    </select>
-    <div id="rekening" class="hidden bg-[#FDEBD0] p-3 rounded mb-2 text-sm">
-      <div class="flex items-center gap-2 mb-2">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" class="w-16">
-        <span class="font-semibold">Bank BCA</span>
-      </div>
-      <p>No Rekening: <span id="norek" class="font-bold">3450062480</span></p>
-      <p>Atas Nama: <span class="font-bold">Eki Aryadi</span></p>
-      <button onclick="copyRek()" class="bg-[#C58940] text-white px-3 py-1 rounded mt-2">Copy No Rekening</button>
-    </div>
-    <div id="bukti" class="hidden">
-      <label class="text-sm">Upload Bukti Transfer</label>
-      <input type="file" class="w-full p-2 border border-[#E5C7A9] rounded mb-2 bg-[#FFF8F0]">
-    </div>
-  </div>
-</div>
-
-<!-- Total -->
-<div class="p-4">
+</div><!-- Total --><div class="p-4">
   <div class="bg-[#FDEBD0] p-4 rounded-xl shadow text-center border border-[#F3D7B6]">
     <p class="text-[#6B4226]">Total Harga:</p>
     <h2 id="total" class="text-2xl font-bold text-[#8B4513]">Rp0</h2>
   </div>
-</div>
-
-<!-- Checkout -->
-<div class="p-4">
-  <button onclick="checkout()" class="w-full bg-[#C58940] hover:bg-[#A9712A] text-white p-3 rounded-xl transition">
-    Checkout via WhatsApp
-  </button>
-</div>
-
-<!-- Keranjang -->
-<div id="floatingCart">
+</div><!-- Checkout --><div class="p-4">
+  <button onclick="checkout()" class="w-full bg-[#C58940] hover:bg-[#A9712A] text-white p-3 rounded-xl transition">Checkout via WhatsApp</button>
+</div><!-- Keranjang --><div id="floatingCart">
   <img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png">
   <span id="cartCount" class="font-bold text-lg">0</span>
-</div>
-
-<script>
+</div><script>
 let items = [
-  {id:1,name:"Nastar Original",price:60000,img:"n1.jpg"},
-  {id:2,name:"Nastar Keju",price:65000,img:"n2.jpg"}
+  {id:1,name:"Nastar Original",price:60000,img:"n1.jpg",desc:"Deskripsi kue"},
+  {id:2,name:"Nastar Keju",price:65000,img:"n2.jpg",desc:"Deskripsi keju"}
 ];
 
 const hargaPerKm = 5000;
 const penjualLat = -6.259853;
 const penjualLng = 106.696360;
-const adminPass = "260991Eki"; // Password admin
+const adminPass = "260991";
+let map, marker;
 
-// Render menu
 function renderMenu(){
   const container = document.getElementById('menuContainer');
   container.innerHTML='<h2 class="text-xl font-bold mb-3 text-[#8B4513]">Menu 🍪</h2>';
@@ -141,6 +78,7 @@ function renderMenu(){
     div.innerHTML=`
       <img src="${item.img}" class="w-full h-40 object-cover rounded-xl mb-2">
       <h3 class="font-semibold text-lg text-[#6B4226]">${item.name}</h3>
+      <p class="text-[#A67C52] text-sm mb-1">${item.desc}</p>
       <p class="text-[#C58940] font-bold">Rp${item.price.toLocaleString()}</p>
       <input type="number" min="0" value="0" id="qty${item.id}" class="w-full mt-2 p-2 border border-[#E5C7A9] rounded bg-[#FFF8F0]">`;
     container.appendChild(div);
@@ -148,7 +86,6 @@ function renderMenu(){
   });
 }
 
-// Admin login toggle
 function toggleAdmin(){
   const pass = document.getElementById('adminPassword').value;
   const panel = document.getElementById('adminPanel');
@@ -156,11 +93,9 @@ function toggleAdmin(){
   else alert("Password salah!");
 }
 
-// Load JSON file
 function loadJSON(){
   const fileInput = document.getElementById('jsonFile');
   if(fileInput.files.length===0){ alert("Pilih file JSON"); return; }
-  const file = fileInput.files[0];
   const reader = new FileReader();
   reader.onload = function(e){
     try{
@@ -169,22 +104,27 @@ function loadJSON(){
       else alert("Format JSON salah!");
     }catch(err){ alert("Gagal membaca JSON"); }
   };
-  reader.readAsText(file);
+  reader.readAsText(fileInput.files[0]);
 }
 
-// Hitung total & ongkir
+function downloadJSON(){
+  const blob = new Blob([JSON.stringify(items, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'menu.json';
+  a.click();
+}
+
 function hitungTotal(){
   let total=0;
   items.forEach(item=>{
     const qty=parseInt(document.getElementById(`qty${item.id}`).value)||0;
     total+=qty*item.price;
   });
-  const ongkir=parseInt(document.getElementById('ongkir').value)||0;
-  total+=ongkir;
+  total+=parseInt(document.getElementById('ongkir').value)||0;
   document.getElementById('total').innerText="Rp"+total.toLocaleString();
 }
 
-// Update keranjang melayang
 function updateCart(){
   let totalItems=0;
   items.forEach(item=>{
@@ -193,29 +133,12 @@ function updateCart(){
   document.getElementById('cartCount').innerText=totalItems;
 }
 
-// Toggle pembayaran
-function togglePembayaran(){
-  const metode=document.getElementById("metode").value;
-  document.getElementById("rekening").classList.toggle("hidden",metode!=="Transfer");
-  document.getElementById("bukti").classList.toggle("hidden",metode!=="Transfer");
-}
-
-// Toggle pengiriman
-function togglePengiriman(){
-  const opsi=document.getElementById("opsiKirim").value;
-  document.getElementById("rekening").classList.toggle("hidden", opsi!=="Transfer");
-  document.getElementById("bukti").classList.toggle("hidden", opsi!=="Transfer");
-  const block=document.getElementById("alamatBlock");
-  if(opsi==="PickUp"){ block.style.display="none"; document.getElementById('ongkirText').innerText="Ambil Sendiri / Pick Up - Gratis Ongkir"; document.getElementById('ongkir').value=0; }
-  else{ block.style.display="block"; document.getElementById('ongkirText').innerText="Ambil lokasi untuk menghitung ongkir COD..."; document.getElementById('ongkir').value=0; }
-  hitungTotal();
-}
-
 function ambilLokasi(){
   if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(function(pos){
+    navigator.geolocation.getCurrentPosition(pos=>{
       const lat=pos.coords.latitude, lng=pos.coords.longitude;
-      document.getElementById('alamatAuto').value=`https://www.google.com/maps?q=${lat},${lng}`;
+      setMapMarker(lat,lng);
+      document.getElementById('alamatManual').value=`https://www.google.com/maps?q=${lat},${lng}`;
       const jarak = hitungJarak(penjualLat,penjualLng,lat,lng);
       const biaya = Math.ceil(jarak)*hargaPerKm;
       document.getElementById('ongkirText').innerText=`Jarak: ${jarak.toFixed(2)} km | Ongkir COD: Rp${biaya.toLocaleString()}`;
@@ -225,13 +148,28 @@ function ambilLokasi(){
   }else alert("Geolocation tidak didukung.");
 }
 
+function resetLokasi(){
+  document.getElementById('alamatManual').value='';
+  if(marker){ map.removeLayer(marker); marker=null; }
+  document.getElementById('ongkirText').innerText='Ambil lokasi untuk menghitung ongkir COD...';
+  document.getElementById('ongkir').value=0;
+  hitungTotal();
+}
+
+function setMapMarker(lat,lng){
+  if(!map){ map = L.map('map').setView([lat,lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  }
+  if(marker){ marker.setLatLng([lat,lng]); }
+  else marker = L.marker([lat,lng]).addTo(map);
+  map.setView([lat,lng], 15);
+}
+
 function hitungJarak(lat1,lng1,lat2,lng2){
   const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-  return 2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*R;
+  return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
-
-function copyRek(){ navigator.clipboard.writeText(document.getElementById("norek").innerText); alert("Nomor rekening disalin!"); }
 
 function checkout(){
   let pesan="Bunda Zein , saya mau pesan:%0A";
@@ -240,16 +178,13 @@ function checkout(){
     if(qty>0) pesan+=`- ${item.name}: ${qty} toples%0A`;
   });
   const opsi=document.getElementById("opsiKirim").value;
-  if(opsi!=="PickUp"){
-    pesan+=`%0AAlamat Otomatis: ${document.getElementById('alamatAuto').value}%0ADetail Alamat: ${document.getElementById('alamatDetail').value}%0A`;
-  }else pesan+="%0ASaya akan mengambil sendiri / Pick Up (Gratis Ongkir)%0A";
-  pesan+=`Ongkir: ${document.getElementById('ongkirText').innerText}%0AMetode: ${document.getElementById('metode').value}%0ATotal: ${document.getElementById('total').innerText}`;
+  if(opsi!="PickUp") pesan+=`%0AAlamat: ${document.getElementById('alamatManual').value}%0A`;
+  else pesan+="%0ASaya akan mengambil sendiri / Pick Up (Gratis Ongkir)%0A";
+  pesan+=`Ongkir: ${document.getElementById('ongkirText').innerText}%0ATotal: ${document.getElementById('total').innerText}`;
   window.location.href=`https://wa.me/6289610554134?text=${pesan}`;
 }
 
 renderMenu();
-togglePengiriman();
-togglePembayaran();
-</script>
+</script><script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </body>
 </html>
