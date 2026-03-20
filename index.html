@@ -3,122 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nastar - Toko Online</title>
+<title>KUE KERING - Zein Kitchen</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
 <style>
-  body{background:#FFF8F0;color:#5A3E2B;}
+body{background:#FFF8F0;color:#5A3E2B;}
 
-  /* PETA DIPERKECIL */
-  #map{
-    width:100%;
-    height:180px;
-    margin-bottom:1rem;
-    border-radius:0.5rem;
-  }
+#map{
+  width:100%;
+  height:180px;
+  border-radius:8px;
+  z-index:1;
+}
+.leaflet-container{z-index:1 !important;}
 
-  #floatingCart{
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background:#C58940;
-    color:white;
-    padding:10px 14px;
-    border-radius:9999px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    cursor:pointer;
-    z-index:50;
-  }
+#floatingCart{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#C58940;
+  color:white;
+  padding:10px;
+  border-radius:50px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  z-index:50;
+}
+#floatingCart img{width:30px;}
 
-  #floatingCart img{width:32px;height:32px;}
+#cartPopup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
 
-  .goyang{animation:goyang 0.5s;}
-  @keyframes goyang {
-    0%{transform:rotate(0);}
-    25%{transform:rotate(-15deg);}
-    50%{transform:rotate(15deg);}
-    75%{transform:rotate(-10deg);}
-    100%{transform:rotate(0);}
-  }
-
-  /* POPUP TIDAK FULLSCREEN */
-  #cartPopup{
-    position: fixed;
-    top:50%;
-    left:50%;
-    transform: translate(-50%, -50%);
-    display:none;
-    z-index:100;
-  }
-
-  #cartPopupContent{
-    background:#FFFDF9;
-    padding:1rem;
-    border-radius:0.5rem;
-    width:90%;
-    max-width:350px;
-    max-height:80vh;
-    overflow-y:auto;
-    box-shadow:0 5px 15px rgba(0,0,0,0.3);
-  }
+#cartPopupContent{
+  background:#FFFDF9;
+  padding:1rem;
+  border-radius:10px;
+  width:90%;
+  max-width:420px;
+  max-height:85vh;
+  overflow-y:auto;
+}
 </style>
 </head>
 
 <body class="p-4">
 
-<h1 class="text-center text-2xl font-bold mb-4">Zein Kitchen</h1>
+<h1 class="text-center text-xl font-bold mb-4">Zein Kitchen</h1>
 
 <!-- MENU -->
-<div class="mb-4">
-  <div class="bg-[#FFFDF9] p-4 rounded-xl shadow mb-4 border border-[#F3D7B6]">
-    <img src="n1.jpg" class="w-full h-40 object-cover rounded-xl mb-2">
-    <h3 class="font-semibold">Nastar Original</h3>
-    <p class="text-[#C58940] font-bold">Rp60.000</p>
-    <input type="number" id="qty1" value="0" min="0" class="w-full mt-2 p-2 border rounded">
-  </div>
+<div class="bg-white p-4 rounded shadow mb-4">
+  <img src="n1.jpg" class="w-full h-40 object-cover mb-2 rounded">
+  <h3>Nastar Original</h3>
+  <p>Rp60.000</p>
 
-  <div class="bg-[#FFFDF9] p-4 rounded-xl shadow border border-[#F3D7B6]">
-    <img src="n2.jpg" class="w-full h-40 object-cover rounded-xl mb-2">
-    <h3 class="font-semibold">Nastar Keju</h3>
-    <p class="text-[#C58940] font-bold">Rp65.000</p>
-    <input type="number" id="qty2" value="0" min="0" class="w-full mt-2 p-2 border rounded">
+  <div class="flex gap-2 mt-2">
+    <button onclick="kurang(1)" class="bg-[#C58940] text-white px-3 rounded">-</button>
+    <input id="qty1" type="number" value="0" class="w-full text-center border">
+    <button onclick="tambah(1)" class="bg-[#C58940] text-white px-3 rounded">+</button>
+  </div>
+</div>
+
+<div class="bg-white p-4 rounded shadow mb-4">
+  <img src="n2.jpg" class="w-full h-40 object-cover mb-2 rounded">
+  <h3>Nastar Keju</h3>
+  <p>Rp65.000</p>
+
+  <div class="flex gap-2 mt-2">
+    <button onclick="kurang(2)" class="bg-[#C58940] text-white px-3 rounded">-</button>
+    <input id="qty2" type="number" value="0" class="w-full text-center border">
+    <button onclick="tambah(2)" class="bg-[#C58940] text-white px-3 rounded">+</button>
   </div>
 </div>
 
 <!-- ALAMAT -->
-<textarea id="alamatAuto" class="w-full p-2 border rounded mb-2" readonly></textarea>
-<textarea id="alamatDetail" class="w-full p-2 border rounded mb-2"></textarea>
+<textarea id="alamatAuto" class="w-full p-2 border rounded mb-2" readonly placeholder="Alamat otomatis"></textarea>
+<textarea id="alamatDetail" class="w-full p-2 border rounded mb-2" placeholder="Detail alamat"></textarea>
 
 <div id="map"></div>
 
-<div class="flex gap-2 mb-4">
-  <button onclick="ambilLokasi()" class="flex-1 bg-[#8B4513] text-white p-2 rounded">📍 Ambil Lokasi</button>
-  <button onclick="resetLokasi()" class="flex-1 bg-[#C58940] text-white p-2 rounded">❌ Reset</button>
+<div class="flex gap-2 mt-2 mb-2">
+<button onclick="ambilLokasi()" class="bg-[#8B4513] text-white p-2 w-full rounded">📍 Ambil Lokasi</button>
+<button onclick="resetLokasi()" class="bg-[#C58940] text-white p-2 w-full rounded">Reset</button>
 </div>
 
-<!-- ONGKIR -->
-<p id="ongkirText">Klik ambil lokasi...</p>
+<!-- TOMBOL GOOGLE MAPS -->
+<button onclick="bukaMaps()" class="bg-blue-600 text-white p-2 w-full rounded mb-2">
+📍 Lihat Rute di Google Maps
+</button>
+
+<p id="ongkirText">Klik lokasi untuk hitung ongkir</p>
 <input type="hidden" id="ongkir" value="0">
 
 <!-- PEMBAYARAN -->
-<select id="metode" onchange="togglePembayaran()" class="p-2 border w-full mb-2">
-  <option value="COD">COD</option>
-  <option value="Transfer">Transfer</option>
+<select id="metode" onchange="togglePembayaran()" class="w-full p-2 border mb-2 rounded">
+<option value="COD">COD</option>
+<option value="Transfer">Transfer</option>
 </select>
 
-<div id="rekening" class="hidden bg-[#FDEBD0] p-3 rounded">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/BCA_logo.svg/1200px-BCA_logo.svg.png" class="w-16 mb-2">
-  <p>No Rekening: <b id="norek">3450062480</b></p>
-  <button onclick="copyRek()" class="bg-[#C58940] text-white px-3 py-1 rounded mt-2 w-full">Copy</button>
+<div id="rekening" class="hidden bg-yellow-100 p-2 rounded">
+  <img src="https://seeklogo.com/images/B/bca-bank-central-asia-logo-68BCA4E0B3-seeklogo.com.png" class="w-16 mb-2">
+  <p>No Rek: 3450062480 - Eki Aryadi</p>
 </div>
 
 <p class="mt-2">Total: <span id="total">Rp0</span></p>
 
-<button onclick="checkout()" class="bg-[#C58940] text-white p-2 w-full mt-2 rounded">
-Checkout WhatsApp
+<button onclick="checkout()" class="bg-[#C58940] text-white w-full p-2 mt-2 rounded">
+Checkout via WhatsApp
 </button>
 
 <!-- CART -->
@@ -130,67 +130,155 @@ Checkout WhatsApp
 <!-- POPUP -->
 <div id="cartPopup">
   <div id="cartPopupContent">
-    <h2 class="font-bold mb-2">Keranjang</h2>
+    <h3 class="font-bold mb-2">Keranjang Belanja</h3>
     <div id="popupItems"></div>
-    <p id="popupTotal"></p>
-    <button onclick="closePopup()" class="w-full border mt-2 p-2">Tutup</button>
+    <p id="popupOngkir"></p>
+    <p id="popupTotal" class="font-bold mt-2"></p>
+
+    <button onclick="checkout()" class="bg-[#C58940] text-white w-full p-2 mt-3 rounded">
+      Checkout
+    </button>
+
+    <button onclick="closePopup()" class="border w-full mt-2 p-2 rounded">
+      Tutup
+    </button>
   </div>
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-const harga1=60000, harga2=65000;
+const harga1=60000, harga2=65000, hargaPerKm=5000;
 const penjualLat=-6.259853, penjualLng=106.696360;
 
-const cart=document.getElementById('floatingCart');
-
+/* TOTAL */
 function hitungTotal(){
-  let q1=qty1.value||0, q2=qty2.value||0;
-  total.innerText="Rp"+((q1*harga1)+(q2*harga2)).toLocaleString();
+  let q1=qty1.value||0;
+  let q2=qty2.value||0;
+  let ongkirVal=parseInt(ongkir.value)||0;
+  total.innerText="Rp"+((q1*harga1)+(q2*harga2)+ongkirVal).toLocaleString();
 }
 
 function updateCart(){
   cartCount.innerText=(+qty1.value)+(+qty2.value);
 }
 
+/* BUTTON + - */
+function tambah(id){let el=document.getElementById('qty'+id);el.value++;hitungTotal();updateCart();}
+function kurang(id){let el=document.getElementById('qty'+id);if(el.value>0) el.value--;hitungTotal();updateCart();}
+
 qty1.oninput=qty2.oninput=()=>{hitungTotal();updateCart();};
 
-cart.onclick=()=>{
+/* POPUP */
+floatingCart.onclick=()=>{
   popupItems.innerHTML=`Original: ${qty1.value}<br>Keju: ${qty2.value}`;
+  popupOngkir.innerText=ongkirText.innerText;
   popupTotal.innerText=total.innerText;
-  cartPopup.style.display="block";
+  cartPopup.style.display="flex";
 }
 
 function closePopup(){cartPopup.style.display="none";}
+window.onclick=e=>{if(e.target==cartPopup) cartPopup.style.display="none";}
 
+/* PEMBAYARAN */
 function togglePembayaran(){
-  rekening.classList.toggle('hidden', metode.value!=='Transfer');
+  rekening.classList.toggle("hidden", metode.value!=="Transfer");
 }
 
-function copyRek(){navigator.clipboard.writeText(norek.innerText);}
-
+/* MAP */
 let map=L.map('map').setView([penjualLat,penjualLng],13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let marker=L.marker([penjualLat,penjualLng],{draggable:true}).addTo(map);
 
+/* HITUNG JARAK */
+function hitungJarak(lat1,lng1,lat2,lng2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+/* AMBIL ALAMAT (NAMA JALAN) */
+async function getAlamat(lat, lng){
+  try{
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+    const data = await res.json();
+    if(data && data.display_name){
+      alamatAuto.value = data.display_name;
+    }
+  }catch{}
+}
+
+/* UPDATE ONGKIR */
+function updateOngkir(){
+  const pos=marker.getLatLng();
+  getAlamat(pos.lat,pos.lng);
+
+  const jarak=hitungJarak(penjualLat,penjualLng,pos.lat,pos.lng);
+  const biaya=Math.ceil(jarak)*hargaPerKm;
+
+  ongkirText.innerText=`Jarak ${jarak.toFixed(2)} km | Ongkir Rp${biaya.toLocaleString()}`;
+  ongkir.value=biaya;
+  hitungTotal();
+}
+
+marker.on('dragend',updateOngkir);
+
+/* LOKASI */
 function ambilLokasi(){
  navigator.geolocation.getCurrentPosition(pos=>{
-   let lat=pos.coords.latitude,lng=pos.coords.longitude;
-   marker.setLatLng([lat,lng]);
-   map.setView([lat,lng],15);
+   marker.setLatLng([pos.coords.latitude,pos.coords.longitude]);
+   map.setView([pos.coords.latitude,pos.coords.longitude],15);
+   getAlamat(pos.coords.latitude,pos.coords.longitude);
+   updateOngkir();
  });
 }
 
 function resetLokasi(){
  marker.setLatLng([penjualLat,penjualLng]);
+ alamatAuto.value="";
+ alamatDetail.value="";
+ ongkirText.innerText="Klik lokasi untuk hitung ongkir";
+ ongkir.value=0;
+ hitungTotal();
 }
 
+/* GOOGLE MAPS */
+function bukaMaps(){
+  const pos = marker.getLatLng();
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${pos.lat},${pos.lng}`;
+  window.open(url, "_blank");
+}
+
+/* CHECKOUT WA */
 function checkout(){
- window.location.href="https://wa.me/6289610554134";
+  let q1=qty1.value||0;
+  let q2=qty2.value||0;
+  let ongkirVal=parseInt(ongkir.value)||0;
+
+  let pesan="Bunda Zein, saya mau pesan:%0A";
+
+  if(q1>0) pesan+=`- Nastar Original: ${q1} toples%0A`;
+  if(q2>0) pesan+=`- Nastar Keju: ${q2} toples%0A`;
+
+  if(alamatAuto.value){
+    pesan+=`%0AAlamat: ${alamatAuto.value}%0A${alamatDetail.value}%0A`;
+  }
+
+  pesan+=`Ongkir: ${ongkirText.innerText}%0A`;
+  pesan+=`Metode: ${metode.value}%0A`;
+
+  let totalHarga=((q1*harga1)+(q2*harga2)+ongkirVal);
+  pesan+=`Total: Rp${totalHarga.toLocaleString()}`;
+
+  if(metode.value==="Transfer"){
+    pesan+=`%0ANo Rekening: 3450062480 - Eki Aryadi`;
+  }
+
+  window.location.href=`https://wa.me/6289610554134?text=${pesan}`;
 }
 </script>
 
 </body>
 </html>
-  
