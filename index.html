@@ -71,7 +71,7 @@ overflow:auto;
 <!-- PENGIRIMAN -->
 <select id="pengiriman" onchange="updatePengiriman()" class="w-full p-2 border mb-2">
 <option value="antar">🛵 Diantar</option>
-<option value="pickup">📦 Pick up (Gratis Ongkir)</option>
+<option value="pickup">📦 Ambil Sendiri (Gratis Ongkir)</option>
 </select>
 
 <!-- ALAMAT -->
@@ -138,13 +138,43 @@ function tambah(id){let e=document.getElementById('qty'+id);e.value++;hitungTota
 function kurang(id){let e=document.getElementById('qty'+id);if(e.value>0)e.value--;hitungTotal();updateCart();}
 qty1.oninput=qty2.oninput=()=>{hitungTotal();updateCart();};
 
+/* MAP */
+let map=L.map('map').setView(penjual,13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let marker=L.marker(penjual,{draggable:true}).addTo(map);
+
+/* HITUNG JARAK */
+function hitungJarak(a,b,c,d){
+const R=6371;
+const dLat=(c-a)*Math.PI/180;
+const dLng=(d-b)*Math.PI/180;
+const x=Math.sin(dLat/2)**2+
+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+Math.sin(dLng/2)**2;
+return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+/* ONGKIR NORMAL */
+function updateOngkir(){
+if(pengiriman.value=="pickup") return;
+
+let p=marker.getLatLng();
+let jarak=hitungJarak(penjual[0],penjual[1],p.lat,p.lng);
+let biaya=Math.ceil(jarak)*hargaPerKm;
+
+ongkirText.innerText=`Jarak ${jarak.toFixed(2)} km | Ongkir Rp${biaya.toLocaleString()}`;
+ongkir.value=biaya;
+hitungTotal();
+}
+
+marker.on('dragend',updateOngkir);
+
 /* PENGIRIMAN */
 function updatePengiriman(){
 if(pengiriman.value=="pickup"){
 ongkir.value=0;
 ongkirText.innerText="Ambil sendiri (Gratis Ongkir)";
 
-// 🔥 hide semua
 alamatAuto.style.display="none";
 alamatDetail.style.display="none";
 map._container.style.display="none";
@@ -153,8 +183,6 @@ btnReset.style.display="none";
 btnMaps.style.display="none";
 
 }else{
-
-// 🔥 tampilkan lagi
 alamatAuto.style.display="block";
 alamatDetail.style.display="block";
 map._container.style.display="block";
@@ -164,24 +192,6 @@ btnMaps.style.display="block";
 
 updateOngkir();
 }
-hitungTotal();
-}
-
-/* MAP */
-let map=L.map('map').setView(penjual,13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-let marker=L.marker(penjual,{draggable:true}).addTo(map);
-
-/* ONGKIR */
-function updateOngkir(){
-if(pengiriman.value=="pickup") return;
-
-let p=marker.getLatLng();
-let jarak=Math.ceil(Math.random()*5);
-let biaya=jarak*hargaPerKm;
-
-ongkirText.innerText=`Jarak ${jarak} km | Ongkir Rp${biaya.toLocaleString()}`;
-ongkir.value=biaya;
 hitungTotal();
 }
 
