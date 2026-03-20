@@ -19,8 +19,22 @@ position:fixed;bottom:20px;right:20px;
 background:#C58940;color:#fff;
 padding:10px;border-radius:50px;
 display:flex;gap:8px;z-index:50;
+cursor:pointer;
 }
 #floatingCart img{width:30px;}
+
+#cartPopup{
+position:fixed;inset:0;
+background:rgba(0,0,0,0.4);
+display:none;justify-content:center;
+align-items:center;z-index:9999;
+}
+#cartPopupContent{
+background:#fff;padding:15px;
+border-radius:10px;width:90%;
+max-width:420px;max-height:85vh;
+overflow:auto;
+}
 </style>
 </head>
 
@@ -61,9 +75,8 @@ display:flex;gap:8px;z-index:50;
 <option value="pickup">📦 Pick up (Gratis Ongkir)</option>
 </select>
 
-<!-- ALAMAT -->
-<textarea id="alamatAuto" class="w-full p-2 border mb-2" readonly placeholder="Alamat otomatis"></textarea>
-<textarea id="alamatDetail" class="w-full p-2 border mb-2" placeholder="Detail alamat"></textarea>
+<textarea id="alamatAuto" class="w-full p-2 border mb-2" readonly></textarea>
+<textarea id="alamatDetail" class="w-full p-2 border mb-2"></textarea>
 
 <div id="map"></div>
 
@@ -79,21 +92,6 @@ display:flex;gap:8px;z-index:50;
 <p id="ongkirText">Klik lokasi untuk hitung ongkir</p>
 <input type="hidden" id="ongkir" value="0">
 
-<!-- PEMBAYARAN -->
-<select id="metode" onchange="togglePembayaran()" class="w-full p-2 border mb-2">
-<option value="COD">COD</option>
-<option value="Transfer">Transfer</option>
-</select>
-
-<div id="rekening" class="hidden bg-yellow-100 p-3 rounded">
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" class="w-24 mb-2">
-<p>No Rekening: <b id="norek">3450062480</b></p>
-<p>Atas Nama: <b>Eki Aryadi</b></p>
-<button onclick="copyRek()" class="bg-[#C58940] text-white w-full p-2 mt-2 rounded">
-Copy No Rekening
-</button>
-</div>
-
 <p>Total: <span id="total">Rp0</span></p>
 
 <button onclick="checkout()" class="bg-[#C58940] text-white w-full p-2 mt-2">
@@ -106,6 +104,20 @@ Checkout WhatsApp
 <span id="cartCount">0</span>
 </div>
 
+<!-- POPUP -->
+<div id="cartPopup">
+<div id="cartPopupContent">
+<h3 class="font-bold mb-2">Keranjang</h3>
+
+<div id="popupItems"></div>
+<p id="popupOngkir"></p>
+<p id="popupTotal" class="font-bold mt-2"></p>
+
+<button onclick="checkout()" class="bg-[#C58940] text-white w-full p-2 mt-2">Checkout</button>
+<button onclick="closePopup()" class="border w-full mt-2 p-2">Tutup</button>
+</div>
+</div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
@@ -113,8 +125,9 @@ const harga1=60000,harga2=65000,hargaPerKm=5000;
 const penjual=[-6.259853,106.696360];
 
 function hitungTotal(){
-let q1=qty1.value||0,q2=qty2.value||0,o=ongkir.value||0;
-total.innerText="Rp"+((q1*harga1)+(q2*harga2)+(+o)).toLocaleString();
+let q1=+qty1.value||0,q2=+qty2.value||0,o=+ongkir.value||0;
+let totalHarga=(q1*harga1)+(q2*harga2)+o;
+total.innerText="Rp"+totalHarga.toLocaleString();
 }
 
 function updateCart(){
@@ -125,21 +138,29 @@ function tambah(id){let e=document.getElementById('qty'+id);e.value++;hitungTota
 function kurang(id){let e=document.getElementById('qty'+id);if(e.value>0)e.value--;hitungTotal();updateCart();}
 qty1.oninput=qty2.oninput=()=>{hitungTotal();updateCart();};
 
-function togglePembayaran(){
-rekening.classList.toggle("hidden",metode.value!=="Transfer");
+/* POPUP */
+floatingCart.onclick=()=>{
+let q1=+qty1.value||0,q2=+qty2.value||0,o=+ongkir.value||0;
+
+popupItems.innerHTML=`
+Nastar Original: ${q1}<br>
+Nastar Keju: ${q2}
+`;
+
+popupOngkir.innerText=ongkirText.innerText;
+popupTotal.innerText="Total: "+total.innerText;
+
+cartPopup.style.display="flex";
 }
 
-function copyRek(){
-navigator.clipboard.writeText(norek.innerText);
-alert("Nomor rekening disalin!");
-}
+function closePopup(){cartPopup.style.display="none";}
+window.onclick=e=>{if(e.target==cartPopup)cartPopup.style.display="none";}
 
 /* MAP */
 let map=L.map('map').setView(penjual,13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let marker=L.marker(penjual,{draggable:true}).addTo(map);
 
-/* ONGKIR NORMAL */
 function hitungJarak(a,b,c,d){
 const R=6371;
 const dLat=(c-a)*Math.PI/180;
@@ -164,33 +185,18 @@ hitungTotal();
 
 marker.on('dragend',updateOngkir);
 
-/* PENGIRIMAN */
 function updatePengiriman(){
 if(pengiriman.value=="pickup"){
 ongkir.value=0;
 ongkirText.innerText="Ambil sendiri (Gratis Ongkir)";
-
-alamatAuto.style.display="none";
-alamatDetail.style.display="none";
 document.getElementById("map").style.display="none";
-btnLokasi.style.display="none";
-btnReset.style.display="none";
-btnMaps.style.display="none";
-
 }else{
-alamatAuto.style.display="block";
-alamatDetail.style.display="block";
 document.getElementById("map").style.display="block";
-btnLokasi.style.display="block";
-btnReset.style.display="block";
-btnMaps.style.display="block";
-
 updateOngkir();
 }
 hitungTotal();
 }
 
-/* LOKASI */
 function ambilLokasi(){
 navigator.geolocation.getCurrentPosition(pos=>{
 let lat=pos.coords.latitude;
@@ -214,30 +220,20 @@ let p=marker.getLatLng();
 window.open(`https://www.google.com/maps?q=${p.lat},${p.lng}`);
 }
 
-/* CHECKOUT */
 function checkout(){
 let q1=qty1.value||0,q2=qty2.value||0,o=+ongkir.value||0;
 let p=marker.getLatLng();
-
 let linkMaps=`https://www.google.com/maps?q=${p.lat},${p.lng}`;
 
-let pesan="Bunda Zein, saya mau pesan:%0A";
+let pesan="Pesanan:%0A";
 if(q1>0)pesan+=`- Nastar Original: ${q1}%0A`;
 if(q2>0)pesan+=`- Nastar Keju: ${q2}%0A`;
 
-pesan+=`%0APengiriman: ${pengiriman.value}%0A`;
-
 if(pengiriman.value!=="pickup"){
-pesan+=`Link Lokasi: ${linkMaps}%0A`;
+pesan+=`Lokasi: ${linkMaps}%0A`;
 }
 
-pesan+=`Ongkir: ${ongkirText.innerText}%0A`;
-pesan+=`Metode: ${metode.value}%0A`;
 pesan+=`Total: Rp${((q1*harga1)+(q2*harga2)+o).toLocaleString()}`;
-
-if(metode.value=="Transfer"){
-pesan+=`%0ANo Rek: 3450062480`;
-}
 
 window.location.href=`https://wa.me/6289610554134?text=${pesan}`;
 }
