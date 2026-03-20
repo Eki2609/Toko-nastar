@@ -42,26 +42,32 @@ overflow:auto;
 <h1 class="text-center text-xl font-bold mb-4">Zein Kitchen</h1>
 
 <!-- MENU -->
-<div class="bg-white p-4 rounded shadow mb-4">
-<img src="n1.jpg" class="w-full h-40 object-cover rounded mb-2">
-<h3>Nastar Original</h3>
-<p>Rp60.000</p>
-<div class="flex gap-2 mt-2">
-<button onclick="kurang(1)" class="bg-[#C58940] text-white px-3">-</button>
-<input id="qty1" type="number" value="0" class="w-full text-center border">
-<button onclick="tambah(1)" class="bg-[#C58940] text-white px-3">+</button>
+<div class="grid grid-cols-2 gap-3 mb-4">
+
+<!-- ITEM 1 -->
+<div class="bg-white p-3 rounded shadow">
+<img src="n1.jpg" class="w-full h-28 object-cover rounded mb-2">
+<h3 class="text-sm font-semibold">Nastar Original</h3>
+<p class="text-sm">Rp60.000</p>
+<div class="flex gap-1 mt-2">
+<button onclick="kurang(1)" class="bg-[#C58940] text-white px-2">-</button>
+<input id="qty1" type="number" value="0" class="w-full text-center border text-sm">
+<button onclick="tambah(1)" class="bg-[#C58940] text-white px-2">+</button>
 </div>
 </div>
 
-<div class="bg-white p-4 rounded shadow mb-4">
-<img src="n2.jpg" class="w-full h-40 object-cover rounded mb-2">
-<h3>Nastar Keju</h3>
-<p>Rp65.000</p>
-<div class="flex gap-2 mt-2">
-<button onclick="kurang(2)" class="bg-[#C58940] text-white px-3">-</button>
-<input id="qty2" type="number" value="0" class="w-full text-center border">
-<button onclick="tambah(2)" class="bg-[#C58940] text-white px-3">+</button>
+<!-- ITEM 2 -->
+<div class="bg-white p-3 rounded shadow">
+<img src="n2.jpg" class="w-full h-28 object-cover rounded mb-2">
+<h3 class="text-sm font-semibold">Nastar Keju</h3>
+<p class="text-sm">Rp65.000</p>
+<div class="flex gap-1 mt-2">
+<button onclick="kurang(2)" class="bg-[#C58940] text-white px-2">-</button>
+<input id="qty2" type="number" value="0" class="w-full text-center border text-sm">
+<button onclick="tambah(2)" class="bg-[#C58940] text-white px-2">+</button>
 </div>
+</div>
+
 </div>
 
 <!-- PENGIRIMAN -->
