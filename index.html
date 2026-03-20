@@ -21,19 +21,6 @@ padding:10px;border-radius:50px;
 display:flex;gap:8px;z-index:50;
 }
 #floatingCart img{width:30px;}
-
-#cartPopup{
-position:fixed;inset:0;
-background:rgba(0,0,0,0.4);
-display:none;justify-content:center;
-align-items:center;z-index:9999;
-}
-#cartPopupContent{
-background:#fff;padding:15px;
-border-radius:10px;width:90%;
-max-width:420px;max-height:85vh;
-overflow:auto;
-}
 </style>
 </head>
 
@@ -138,12 +125,21 @@ function tambah(id){let e=document.getElementById('qty'+id);e.value++;hitungTota
 function kurang(id){let e=document.getElementById('qty'+id);if(e.value>0)e.value--;hitungTotal();updateCart();}
 qty1.oninput=qty2.oninput=()=>{hitungTotal();updateCart();};
 
+function togglePembayaran(){
+rekening.classList.toggle("hidden",metode.value!=="Transfer");
+}
+
+function copyRek(){
+navigator.clipboard.writeText(norek.innerText);
+alert("Nomor rekening disalin!");
+}
+
 /* MAP */
 let map=L.map('map').setView(penjual,13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 let marker=L.marker(penjual,{draggable:true}).addTo(map);
 
-/* HITUNG JARAK */
+/* ONGKIR NORMAL */
 function hitungJarak(a,b,c,d){
 const R=6371;
 const dLat=(c-a)*Math.PI/180;
@@ -154,7 +150,6 @@ Math.sin(dLng/2)**2;
 return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
 }
 
-/* ONGKIR NORMAL */
 function updateOngkir(){
 if(pengiriman.value=="pickup") return;
 
@@ -177,7 +172,7 @@ ongkirText.innerText="Ambil sendiri (Gratis Ongkir)";
 
 alamatAuto.style.display="none";
 alamatDetail.style.display="none";
-map._container.style.display="none";
+document.getElementById("map").style.display="none";
 btnLokasi.style.display="none";
 btnReset.style.display="none";
 btnMaps.style.display="none";
@@ -185,7 +180,7 @@ btnMaps.style.display="none";
 }else{
 alamatAuto.style.display="block";
 alamatDetail.style.display="block";
-map._container.style.display="block";
+document.getElementById("map").style.display="block";
 btnLokasi.style.display="block";
 btnReset.style.display="block";
 btnMaps.style.display="block";
@@ -203,7 +198,6 @@ let lng=pos.coords.longitude;
 
 marker.setLatLng([lat,lng]);
 map.setView([lat,lng],15);
-
 updateOngkir();
 });
 }
@@ -218,6 +212,34 @@ hitungTotal();
 function bukaMaps(){
 let p=marker.getLatLng();
 window.open(`https://www.google.com/maps?q=${p.lat},${p.lng}`);
+}
+
+/* CHECKOUT */
+function checkout(){
+let q1=qty1.value||0,q2=qty2.value||0,o=+ongkir.value||0;
+let p=marker.getLatLng();
+
+let linkMaps=`https://www.google.com/maps?q=${p.lat},${p.lng}`;
+
+let pesan="Bunda Zein, saya mau pesan:%0A";
+if(q1>0)pesan+=`- Nastar Original: ${q1}%0A`;
+if(q2>0)pesan+=`- Nastar Keju: ${q2}%0A`;
+
+pesan+=`%0APengiriman: ${pengiriman.value}%0A`;
+
+if(pengiriman.value!=="pickup"){
+pesan+=`Link Lokasi: ${linkMaps}%0A`;
+}
+
+pesan+=`Ongkir: ${ongkirText.innerText}%0A`;
+pesan+=`Metode: ${metode.value}%0A`;
+pesan+=`Total: Rp${((q1*harga1)+(q2*harga2)+o).toLocaleString()}`;
+
+if(metode.value=="Transfer"){
+pesan+=`%0ANo Rek: 3450062480`;
+}
+
+window.location.href=`https://wa.me/6289610554134?text=${pesan}`;
 }
 </script>
 
